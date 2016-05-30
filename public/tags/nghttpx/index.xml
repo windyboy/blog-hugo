@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nghttpx on 后花园</title>
+    <link>https://windyboy.github.io/tags/nghttpx/</link>
+    <description>Recent content in Nghttpx on 后花园</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>windyboy © 2016 Copyright Text</copyright>
+    <lastBuildDate>Tue, 24 May 2016 15:13:14 +0800</lastBuildDate>
+    <atom:link href="https://windyboy.github.io/tags/nghttpx/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>nghttpx搭配squid科学浏览</title>
+      <link>https://windyboy.github.io/post/2016/05/proxy-with-nghttpx-squid/</link>
+      <pubDate>Tue, 24 May 2016 15:13:14 +0800</pubDate>
+      
+      <guid>https://windyboy.github.io/post/2016/05/proxy-with-nghttpx-squid/</guid>
+      <description>
+
+&lt;h2 id=&#34;概况:5734c22c6813d20780f94abcff46c5b3&#34;&gt;概况&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;服务器&lt;/p&gt;
+
+&lt;p&gt;服务器上部署代理工具nghttpx，缓存服务squid&lt;/p&gt;
+
+&lt;p&gt;受限制网络 ==proxy==&amp;gt; nghttpx &amp;gt; squid (缓存) ==&amp;gt; 互联网&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;客户端&lt;/p&gt;
+
+&lt;p&gt;客户端是用https proxy的方式访问服务器，同时服务端开启客户端证书认证，在客户端部署自签证书。对比ss的方式减免了客户端软件的部署。&lt;/p&gt;
+
+&lt;p&gt;https proxy client ==&amp;gt; 服务&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;主要工具&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;https proxy 服务器 &lt;a href=&#34;https://nghttp2.org&#34; title=&#34;nghttp2&#34;&gt;nghttp2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;缓存服务器 &lt;a href=&#34;http://www.squid-cache.org&#34; title=&#34;squid&#34;&gt;squid&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;客户端证书生成工具 &lt;a href=&#34;https://github.com/OpenVPN/easy-rsa&#34; title=&#34;easyrsa&#34;&gt;easyrsa&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;客户端证书导入导出 &lt;a href=&#34;https://www.openssl.org&#34; title=&#34;openssl&#34;&gt;openssl&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;安装:5734c22c6813d20780f94abcff46c5b3&#34;&gt;安装&lt;/h2&gt;
+
+&lt;p&gt;这里安装的过程以centos 7为例，其他发行版本可根据实际情况适当&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;#cat /etc/redhat-release 
+CentOS Linux release 7.2.1511 (Core)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;基础软件&lt;/p&gt;
+
+&lt;p&gt;如果使用epel的源安装，首先安装epel&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# yum install epel-release
+# yum install openssl git-core
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://nghttp2.org&#34; title=&#34;nghttp2&#34;&gt;nghttp2&lt;/a&gt; &lt;a href=&#34;http://www.squid-cache.org&#34; title=&#34;squid&#34;&gt;squid&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# yum install nghttp2 squid
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;nghttp2 也可以自编译源码来安装，epel安装的版本是1.7,通过编译可以安装1.9&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;pre&gt;&lt;code&gt;sudo yum groupinstall &amp;quot;Development Tools&amp;quot;
+sudo yum install libev libev-devel zlib zlib-devel openssl openssl-devel git
+git clone https://github.com/nghttp2/nghttp2.git
+cd nghttp2
+autoreconf -i
+automake
+autoconf
+./configure
+make
+sudo make install
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;默认安装位置是 &lt;code&gt;/usr/local/bin&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;在centos 7的环境正不能使用最新版的1.11.0-DEV，需要使用1.9.x的版本。在clone项目以后需要checkout 1.9.x的版本&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;git checkout v1.9.x&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;然后再执行编译的操作,编译安装完成以后，检查一下版本&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;# /usr/local/bin/nghttpx -v&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/OpenVPN/easy-rsa&#34; title=&#34;easyrsa&#34;&gt;easyrsa&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;克隆easyrsa源码&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# git clone https://github.com/OpenVPN/easy-rsa.git
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;把easyrsa 复制到/opt/中完成安装&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# cd easy-rsa/
+# cp -r easyrsa3 /opt/
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;配置:5734c22c6813d20780f94abcff46c5b3&#34;&gt;配置&lt;/h2&gt;
+
+&lt;h3 id=&#34;证书:5734c22c6813d20780f94abcff46c5b3&#34;&gt;证书&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;服务器证书&lt;/p&gt;
+
+&lt;p&gt;服务器端证书可以使用&lt;a href=&#34;https://letsencrypt.org&#34; title=&#34;letsencrypt&#34;&gt;letsencrypt&lt;/a&gt;提供的免费证书。
+配置&lt;a href=&#34;https://letsencrypt.org&#34; title=&#34;letsencrypt&#34;&gt;letsencrypt&lt;/a&gt;证书的时候可以使用&lt;a href=&#34;https://github.com/lukas2511/letsencrypt.sh&#34;&gt;letsencrypt.sh&lt;/a&gt;的脚本,可以简化配置的过程。&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;客户端验证证书&lt;/p&gt;
+
+&lt;p&gt;客户端认证证书因为&lt;a href=&#34;https://letsencrypt.org&#34;&gt;letsencrypt&lt;/a&gt;不提供签发客户端证书的功能，所以需要自己做一个ca，自行签发客户端证书&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;easyrsa 配置客户端证书&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# cd /opt/easyrsa3
+# mv vars.example vars
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;编辑vars文件，去掉前面的注释，编辑中主要的变量&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;set_var EASYRSA_REQ_COUNTRY    &amp;quot;US&amp;quot;
+set_var EASYRSA_REQ_PROVINCE   &amp;quot;California&amp;quot;
+set_var EASYRSA_REQ_CITY       &amp;quot;San Francisco&amp;quot;
+set_var EASYRSA_REQ_ORG        &amp;quot;Copyleft Certificate Co&amp;quot;
+set_var EASYRSA_REQ_EMAIL      &amp;quot;me@example.net&amp;quot;
+set_var EASYRSA_REQ_OU         &amp;quot;My Organizational Unit&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;生成客户端证书&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# ./easyrsa init-pki
+# ./easyrsa build-ca nopass
+# ./easyrsa gen-dh
+# ./easyrsa build-client-full client-me nopass
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;导出CA证书&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# openssl x509 -in pki/ca.crt -out ca.pem -outform PEM
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;导出客户端证书&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# openssl pkcs12 -export -clcerts -in pki/issued/client-me.crt -inkey pki/private/client-me.key -out client-me.p12
+# openssl pkcs12 -in client-me.p12 -out client-me.pem -clcerts
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;客户端电脑导入ca和客户端证书&lt;/p&gt;
+
+&lt;p&gt;最终生成ca.pem, client-me.pem两个证书文件，复制到客户端，并导入。
+ca.pem导入为可信任的证书颁发机构，client-me.pem导入为信任证书。&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;代理:5734c22c6813d20780f94abcff46c5b3&#34;&gt;代理&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;创建nghttpx的配置文件&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# mkdir /etc/nghttpx
+# touch /etc/nghttpx/nghttpx.conf
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;编辑配置文件 nghttpx.conf&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;frontend=0.0.0.0,443;tls
+backend=127.0.0.1,3128;no-tls
+#服务器证书
+private-key-file=/etc/letsencrypt.sh/certs/[domain]/privkey.pem
+certificate-file=/etc/letsencrypt.sh/certs/[domain]/fullchain.pem
+#客户端验证
+dh-param-file=/etc/nghttpx/dh.pem
+verify-client-cacert=/etc/nghttpx/ca.pem
+#代理
+http2-proxy=yes
+no-via=yes
+no-ocsp=yes
+no-host-rewrite=yes
+add-x-forwarded-for=yes
+strip-incoming-x-forwarded-for=yes
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;其中[domain]为服务器的域名，privkey.pem, fullchain.pem是letsencrypt生成的服务器证书。dh.pem, ca.pem是客户端证书&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;ngttpx服务&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# vi /etc/systemd/system/nghttpx.service
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;编辑内容&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Unit] 
+Description=nghttpx 
+After=network.target 
+
+
+[Service] 
+Type=simple 
+ExecStart=/usr/local/bin/nghttpx --conf=/etc/nghttpx/nghttpx.conf
+ExecReload=/bin/kill -SIGUSR1 ${MAINPID}
+ExecStop=/bin/kill -SIGQUIT ${MAINPID}
+
+
+[Install] 
+WantedBy=multi-user.target
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;服务&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# systemctl daemon-reload
+# systemctl start nghttpx
+# systemctl enable nghttpx
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;缓存:5734c22c6813d20780f94abcff46c5b3&#34;&gt;缓存&lt;/h3&gt;
+
+&lt;p&gt;通过yum安装的squid服务，默认配置基本上已经满足要求，需要做一点小修改&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;编辑配置&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# vi /etc/squid/squid.conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在配置文件尾部加上&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;via off
+forwarded_for delete
+access_log none
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;重启服务&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# systemctl restart squid
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;参考资料:5734c22c6813d20780f94abcff46c5b3&#34;&gt;参考资料&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;nghttpx 官方指引 &lt;a href=&#34;https://nghttp2.org/documentation/nghttpx-howto.html&#34;&gt;https://nghttp2.org/documentation/nghttpx-howto.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;谷歌上另外一篇参考的nghttpx+squid &lt;a href=&#34;https://wzyboy.im/post/1052.html&#34;&gt;https://wzyboy.im/post/1052.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;nghttpx 的配置，证书，服务脚本 &lt;a href=&#34;https://blog.apar.jp/linux/2584/&#34;&gt;https://blog.apar.jp/linux/2584/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;centos 编译 nghttp2 &lt;a href=&#34;https://gist.github.com/sonots/2bdf6cd26c23ef44db71&#34;&gt;https://gist.github.com/sonots/2bdf6cd26c23ef44db71&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;letsencrypt.sh 证书制作 &lt;a href=&#34;https://www.hshh.org/letsencrypt/letsencrypt.sh_http-01&#34;&gt;https://www.hshh.org/letsencrypt/letsencrypt.sh_http-01&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;免费证书提供 &lt;a href=&#34;https://letsencrypt.org/&#34;&gt;https://letsencrypt.org/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;client 证书生成 &lt;a href=&#34;https://gist.github.com/mtigas/952344&#34;&gt;https://gist.github.com/mtigas/952344&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

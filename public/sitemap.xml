@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>https://windyboy.github.io/</loc>
+    <lastmod>2016-05-24T15:13:14+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/post/2016/05/proxy-with-nghttpx-squid/</loc>
+    <lastmod>2016-05-24T15:13:14+08:00</lastmod>
+  </url>
+  
+</urlset>
