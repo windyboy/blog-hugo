@@ -1,0 +1,23 @@
+theme = "hugo-theme-geppaku"
+baseurl = "https://windyboy.github.io/"
+languageCode = "zh-cn"
+title = "后花园"
+MetaDataFormat = "toml"
+# disqusShortname = "windyboy" # optional
+# googleAnalytics = "UA-78513355-1"
+
+copyright = "windyboy © 2016 Copyright Text"
+canonifyurls = false
+categories = ["技术", "娱乐"]
+
+[Params]
+
+duoshuoShortname = "windyboy"
+subtitle = "其他"
+# facebook = "https://facebook.com/foobar"
+twitter = "https://twitter.com/windysylph"
+github = "https://github.com/windyboy"
+showsRSS = true
+profile = "/images/profile.png"
+copyright = "Written by windyboy"
+analytics = "UA-78513355-1"
