@@ -1,4 +1,4 @@
-theme = "hugo-theme-geppaku"
+theme = "angels-ladder"
 baseurl = "https://windyboy.github.io/"
 languageCode = "zh-cn"
 title = "后花园"
@@ -11,7 +11,6 @@ canonifyurls = false
 categories = ["技术", "娱乐"]
 
 [Params]
-
 duoshuoShortname = "windyboy"
 subtitle = "其他"
 # facebook = "https://facebook.com/foobar"
