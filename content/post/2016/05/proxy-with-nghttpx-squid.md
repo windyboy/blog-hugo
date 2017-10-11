@@ -3,7 +3,7 @@ Categories = ["技术"]
 Tags = ["nghttpx", "squid", "proxy", "http2"]
 date = "2016-05-24T15:13:14+08:00"
 title = "nghttpx搭配squid科学浏览"
-
+disqus_shortname = "windyboy"
 +++
 
 
@@ -241,7 +241,10 @@ CentOS Linux release 7.2.1511 (Core)
 * 免费证书提供 https://letsencrypt.org/ 
 * client 证书生成 https://gist.github.com/mtigas/952344
 
-
+## VPS 推荐
+* [linode 东京] (https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66)
+* [bandwagonhost 中国优化] (https://bandwagonhost.com/aff.php?aff=20451)
+* [dgchost 新加波] (https://www.dgchost.net/client/aff.php?aff=226)
 
 [nghttp2]: https://nghttp2.org "nghttp2"
 [squid]: http://www.squid-cache.org "squid"
