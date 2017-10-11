@@ -51,7 +51,7 @@ Pin-Priority: 800
 
 
 ```
-# apt-get update &&
+# apt-get update
 # apt-get install pdns-server
 ```
 
