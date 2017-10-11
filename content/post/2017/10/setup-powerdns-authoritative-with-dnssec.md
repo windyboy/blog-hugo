@@ -286,7 +286,7 @@ some.host	SOA	ns1.some.host hostmaster.some.host 2017101100 28800 7200 604800 86
 ```
 dig some.host soa @localhost
 ;; ANSWER SECTION:
-some.host.              3600    IN      SOA     ns1.some.host. postmaster.some.host. 2017101106 28800 7200 604800 86400
+some.host.              3600    IN      SOA     ns1.some.host. hostmaster.some.host. 2017101106 28800 7200 604800 86400
 ```
 
 ### 创建DNSSEC记录
