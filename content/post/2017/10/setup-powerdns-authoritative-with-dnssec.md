@@ -9,18 +9,18 @@ disqusShortname = "windyboy"
 
 ## 概况
 
-* 起因： [cloudxns]停止了面向个人的服务 
+* 起因： [cloudxns] 停止了面向个人的服务 
 * 解析服务需要提供两个独立的IP，一主一从提供解析服务
 * 两个服务器IP地址要注册到域名注册商的服务里，解决先有鸡还是先有蛋的问题
 * DNSSEC的key也要注册到注册商
-* 使用[postgresql]替代[mariadb]原因在于，在目前这个版本中，日志里总是出现连接断开的警告
+* 使用 [postgresql] 替代[mariadb]原因在于，在目前这个版本中，日志里总是出现连接断开的警告
 
 ## 安装软件
 
 
 **两台服务器都安装相同的软件, authoritative 和 database**
 
-### 从官方的[repo](https://repo.powerdns.com/)安装authoritative服务软件 
+### 从官方的 repo 安装 authoritative 服务软件 
 
 
 
@@ -97,7 +97,7 @@ pdns=>\q
 ```
 x.x.x.x1 是主服务器的IP地址
 
-### 安装 [poweradmin]
+### 安装 poweradmin
 
 **管理界面只安装在主服务器上**
 
@@ -211,7 +211,7 @@ x.x.x.x2   ns2.some.host
 # ping ns2.some.host
 ```
 
-* 配置[powerdns]配置文件
+* 配置 powerdns
 
 在主服务器(ns1.some.host)上配置
 ```
@@ -268,7 +268,7 @@ launch=
 ```
 
 
-### 使用[poweradmin]界面创建 master zone
+### 使用 poweradmin 界面创建 master zone
 
 登录到[poweradmin]的网页， 选择Add master zone的菜单，进入新建向导的网页, 在zone里输入域名 some.host
 
@@ -291,7 +291,7 @@ some.host.              3600    IN      SOA     ns1.some.host. hostmaster.some.h
 
 ### 创建DNSSEC记录
 
-* 使用pdnsutil创建DNSSEC
+* 使用 pdnsutil 创建DNSSEC
 
 ```
 pdnsutil secure-zone some.host
