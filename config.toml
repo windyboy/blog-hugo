@@ -40,7 +40,7 @@ categories = ["技术", "娱乐"]
   identifier = "tags"
   url = "/tags/"
 [[menu.main]]
-  name = "Categories"
+  name = "类别"
   weight = 40
   identifier = "categories"
   url = "/categories/"
