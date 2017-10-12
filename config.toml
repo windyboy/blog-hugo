@@ -14,6 +14,8 @@ copyright = "windyboy All Rights Reserved."
 canonifyurls = false
 categories = ["技术", "娱乐"]
 
+
+
 [author]                  # require                       # 必需
   name = "windyboy"
 
@@ -68,8 +70,8 @@ categories = ["技术", "娱乐"]
   mathjax = true            # see https://www.mathjax.org/                              # 是否使用mathjax（数学公式）
   linkToMarkDown = false    # if you config contentCopyright and hugo output .md files. # 是否在链接到markdown原始文件（如果你配置了下面的许可协议并允许hugo生成markdown文件）
 
-  contentCopyright = '<a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a>'
-
+#   contentCopyright = '<a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a>'
+  
   changyanAppid = ""        # Changyan app id             # 畅言
   changyanAppkey = ""       # Changyan app key
   baidu_push = false        # baidu push                  # 百度
