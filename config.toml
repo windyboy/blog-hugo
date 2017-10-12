@@ -1,6 +1,6 @@
 baseURL = "https://windyboy.github.io"
-languageCode = "en"
-defaultContentLanguage = "en"
+languageCode = "zh-CN"
+defaultContentLanguage = "zh-CN"
 title = "后花园 - 自留地"
 enableRobotsTXT = true
 enableEmoji = true
