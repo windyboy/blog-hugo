@@ -1,10 +1,10 @@
-theme = "hugo-theme-geppaku"
+theme = "angels-ladder"
 baseurl = "https://windyboy.github.io/"
 languageCode = "zh-cn"
 title = "后花园"
 MetaDataFormat = "toml"
 disqusShortname = "windyboy" # optional
-# googleAnalytics = "UA-78513355-1"
+googleAnalytics = "UA-78513355-1"
 
 copyright = "windyboy © 2016-2017 Copyright Text"
 canonifyurls = false
