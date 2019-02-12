@@ -173,7 +173,7 @@ After=network.target
 Type=simple
 User=powerdnsadmin
 Group=powerdnsadmin
-ExecStart=/opt/web/powerdns-admin/flask/bin/python ./run.py
+ExecStart=/opt/web/powerdns-admin/flask/bin/gunicorn --workers 2 --bind unix:/opt/web/powerdns-admin/powerdns-admin.sock app:app
 WorkingDirectory=/opt/web/powerdns-admin
 Restart=always
 
@@ -185,37 +185,51 @@ WantedBy=multi-user.target
 # systemctl enable powerdns-admin
 ```
 
+* 配置反向代理
+
 ```
 # vim /etc/nginx/sites-available/pdns
 
 server {
     server_name pdns.some.local ;
     listen 80;
-    root /var/www/html/pdns;
+      index                     index.html index.htm index.php;
+  root                      /opt/web/powerdns-admin;
+  access_log                /var/log/nginx/powerdns-admin.local.access.log combined;
+  error_log                 /var/log/nginx/powerdns-admin.local.error.log;
 
-    access_log /var/log/nginx/pdns-access.log;
-    error_log /var/log/nginx/pdns-error.log;
+  client_max_body_size              10m;
+  client_body_buffer_size           128k;
+  proxy_redirect                    off;
+  proxy_connect_timeout             90;
+  proxy_send_timeout                90;
+  proxy_read_timeout                90;
+  proxy_buffers                     32 4k;
+  proxy_buffer_size                 8k;
+  proxy_set_header                  Host $host;
+  proxy_set_header                  X-Real-IP $remote_addr;
+  proxy_set_header                  X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_headers_hash_bucket_size    64;
 
-    index index.php;
+  location ~ ^/static/  {
+    include  /etc/nginx/mime.types;
+    root /opt/web/powerdns-admin/app;
 
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
+    location ~*  \.(jpg|jpeg|png|gif)$ {
+      expires 365d;
     }
 
-    location ~ \.php$ {
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
-        fastcgi_index index.php;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_intercept_errors off;
-        fastcgi_buffer_size 16k;
-        fastcgi_buffers 4 16k;
+    location ~* ^.+.(css|js)$ {
+      expires 7d;
     }
+  }
 
-    location ~ /\.ht {
-        deny all;
-    }
+  location / {
+    proxy_pass            http://unix:/opt/web/powerdns-admin/powerdns-admin.sock;
+    proxy_read_timeout    120;
+    proxy_connect_timeout 120;
+    proxy_redirect        off;
+  }
 }
 
 # ln -s /etc/nginx/sites-available/pdns /etc/nginx/sites-enabled/pdns
