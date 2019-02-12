@@ -98,16 +98,20 @@ pdns=>\q
 ```
 x.x.x.x1 是主服务器的IP地址
 
-### 安装 [poweradmin]
+### 安装 [Powerdns-Admin]
 
 **管理界面只安装在主服务器上**
 
 * 安装基础设施
 
 ```
-# apt install php mcrypt php-mcrypt php-pgsql
-# systemctl start php7.0-fpm
-# systemctl enable php7.0-fpm
+# apt install -y libmysqlclient-dev libsasl2-dev libldap2-dev libssl-dev libxml2-dev libxslt1-dev libxmlsec1-dev libffi-dev pkg-config apt-transport-https virtualenv build-essential
+# curl -sL https://deb.nodesource.com/setup_10.x | bash -
+# apt-get install -y nodejs
+# curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+# echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+# apt update -y
+# apt install -y yarn
 # apt install nginx
 ```
 
