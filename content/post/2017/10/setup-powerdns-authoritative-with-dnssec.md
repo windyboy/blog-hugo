@@ -115,7 +115,39 @@ x.x.x.x1 是主服务器的IP地址
 # apt install nginx
 ```
 
-* 配置PHP环境
+* 创建数据库
+
+```
+$ sudo su - postgres
+$ createuser powerdnsadmin
+$ createdb powerdnsadmindb
+$ psql
+postgres=# alter user powerdnsadmin with encrypted password 'powerdnsadmin';
+postgres=# grant all privileges on database powerdnsadmindb to powerdnsadmin;
+```
+
+* 安装软件
+
+```
+# git clone https://github.com/ngoduykhanh/PowerDNS-Admin.git /opt/web/powerdns-admin
+# cd /opt/web/powerdns-admin
+# virtualenv -p python3 flask
+# source ./flask/bin/activate
+# pip install -r requirements.txt
+# pip install psycopg2
+# cp config_template.py config.py
+
+```
+
+
+* 数据库配置
+
+```
+# vi config.py
+SQLALCHEMY_DATABASE_URI = 'postgresql://powerdnsadmin:powerdnsadmin@127.0.0.1/powerdnsadmindb'
+```
+
+
 
 ```
 # vim /etc/nginx/sites-available/pdns
