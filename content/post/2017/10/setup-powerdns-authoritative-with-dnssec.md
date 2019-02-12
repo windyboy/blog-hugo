@@ -148,6 +148,15 @@ SQLALCHEMY_DATABASE_URI = 'postgresql://powerdnsadmin:powerdnsadmin@127.0.0.1/po
 ```
 
 
+* 运行
+
+```
+# export FLASK_APP=app/__init__.py
+# flask db upgrade
+# yarn install --pure-lockfile
+# flask assets build
+# ./run.py
+```
 
 ```
 # vim /etc/nginx/sites-available/pdns
