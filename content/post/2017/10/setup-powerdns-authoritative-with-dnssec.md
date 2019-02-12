@@ -158,6 +158,33 @@ SQLALCHEMY_DATABASE_URI = 'postgresql://powerdnsadmin:powerdnsadmin@127.0.0.1/po
 # ./run.py
 ```
 
+* 安装服务
+
+```
+# groupadd powerdnsadmin
+# useradd --system --user-group powerdnsadmin
+# vim /etc/systemd/system/powerdns-admin.service
+
+[Unit]
+Description=PowerDNS-Admin
+After=network.target
+
+[Service]
+Type=simple
+User=powerdnsadmin
+Group=powerdnsadmin
+ExecStart=/opt/web/powerdns-admin/flask/bin/python ./run.py
+WorkingDirectory=/opt/web/powerdns-admin
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+# systemctl daemon-reload
+# systemctl start powerdns-admin
+# systemctl enable powerdns-admin
+```
+
 ```
 # vim /etc/nginx/sites-available/pdns
 
