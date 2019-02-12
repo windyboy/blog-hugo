@@ -89,8 +89,9 @@ postgres=# \q
 ```
 # psql -U pdns -d pdns -h 127.0.0.1 -p 5432
 
+pdns=> \i /usr/share/doc/pdns-backend-pgsql/schema.pgsql.sql
 pdns=> insert into supermasters (ip, nameserver, account) values ('x.x.x.x1', 'ns2.some.host','admin');
-
+pdns=> insert into domains (name, master, type) values ('some.host', 'x.x.x.x1', 'SLAVE');
 pdns=>\q
 
 # systemctl restart pdns
