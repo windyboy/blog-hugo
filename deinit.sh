@@ -1,2 +1,2 @@
 git submodule deinit -f public
-rm -rf public
+git rm --cache -r public
