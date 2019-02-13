@@ -245,36 +245,27 @@ server {
 # sudo service nginx reload
 ```
 
-* 打开网页，进入安装向导
+* 打开PowerDNS的API
 
 ```
-* Username: pdns
-* Password: <mypdnspassword> 
-* Database type: PostgreSQL
-* Hostname: 127.0.0.1
-* DB Port: 5432
-* Database: pdns
-* Poweradmin administrator password: <newpasswordforwebuser>
+# vi /etc/powerdns/pdns.conf
+#4.0 
+webserver=yes
+api=yes
+api-key=somekey
+
+# systemctl restart pdns
 ```
 
-* 编辑应用程序配置文件
+* 打开网页, 注册新用户并登陆
 
 ```
-# mv /var/www/html/pdns/inc/config-me.inc.php /var/www/html/pdns/inc/config.inc.php
-# chown www-data: /var/www/html/pdns/config.inc.php
-# vim /var/www/html/pdns/config.inc.php
-$db_host = 'localhost';
-$db_port = '5432';
-$db_user = 'pdns';
-$db_pass = '<mypdnspassword>';
-$db_name = 'pdns';
-$db_type = 'pgsql';
-```
+打开 API 设置页面，连接到主服务器
+http://pdns.some.host/admin/setting/pdns
 
-* 删除安装向导
+PDNS API URL: http://localhost:8081
+PDNS API KEY: somekey
 
-```
-# rm -rf /var/www/html/pdns/install/
 ```
 
 
@@ -322,6 +313,9 @@ log-dns-queries=no
 loglevel=9
 socket-dir=/var/run
 version-string=powerdns
+webserver=yes
+api=yes
+api-key=somekey
 include-dir=/etc/powerdns/pdns.d
 launch=
 ```
@@ -507,6 +501,6 @@ some.host.              86400 IN RRSIG NSEC 13 2 86400 (
 [postgresql]: https://www.postgresql.org/ "postgresql"
 [mariadb]: https://mariadb.org/ "mariadb"
 [cloudxns]: https://www.cloudxns.net/ "cloudxns"
-[poweradmin]: http://www.poweradmin.org/ "poweradmin"
+[powerdns-admin]: https://github.com/ngoduykhanh/PowerDNS-Admin "web"
 [namesilo]: https://www.namesilo.com "namesilo"
 
