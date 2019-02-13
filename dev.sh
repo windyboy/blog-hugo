@@ -1,3 +1,3 @@
 #!/bin/bash
 
-hugo server -D -w
+hugo server -t angels-ladder -D -w
