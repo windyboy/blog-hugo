@@ -75,21 +75,22 @@ postgres=# grant all privileges on database pdns to pdns;
 postgres=# \q
 ```
 
-* 安装powerdns的backend
+* 安装powerdns的backend, 创建数据库
 
 ```
 # apt install pdns-backend-pgsql
+# psql -U pdns -d pdns -h 127.0.0.1 -p 5432
+pdns=> \i /usr/share/doc/pdns-backend-pgsql/schema.pgsql.sql
 ```
-安装过程中会询问数据库用户的信息，根据前面初始化的用户名/密码，填入即可
+
 
 * 建立主从数据的复制
 
-在从服务器上执行
+在从(Slave)服务器上执行
 
 ```
 # psql -U pdns -d pdns -h 127.0.0.1 -p 5432
 
-pdns=> \i /usr/share/doc/pdns-backend-pgsql/schema.pgsql.sql
 pdns=> insert into supermasters (ip, nameserver, account) values ('x.x.x.x1', 'ns2.some.host','admin');
 pdns=> insert into domains (name, master, type) values ('some.host', 'x.x.x.x1', 'SLAVE');
 pdns=>\q
@@ -237,21 +238,11 @@ server {
 # systemctl restart nginx
 ```
 
-* 打开PowerDNS的API
+* 连接到PowerDNS API
 
 ```
-# vi /etc/powerdns/pdns.conf
-#4.0 
-webserver=yes
-api=yes
-api-key=somekey
+打开网页 pdns.some.host ， 注册新用户并登陆
 
-# systemctl restart pdns
-```
-
-* 打开网页, 注册新用户并登陆
-
-```
 打开 API 设置页面，连接到主服务器
 http://pdns.some.host/admin/setting/pdns
 
@@ -264,9 +255,9 @@ PDNS API KEY: somekey
 
 ## 配置服务
 
-### 配置主机环境
+### 配置环境
 
-* 配置主机host文件，强制解析 ns1, ns2
+* 配置host文件，强制解析 ns1, ns2
 ```
 # vim /etc/hosts
 x.x.x.x1   ns1.some.host
@@ -281,9 +272,7 @@ x.x.x.x2   ns2.some.host
 # ping ns2.some.host
 ```
 
-* 配置[powerdns]配置文件
-
-在主服务器(ns1.some.host)上配置
+### Master ns1.some.host
 ```
 # vim /etc/powerdns/pdns.conf
 
@@ -305,6 +294,7 @@ log-dns-queries=no
 loglevel=9
 socket-dir=/var/run
 version-string=powerdns
+# only 4.0
 webserver=yes
 api=yes
 api-key=somekey
@@ -315,7 +305,7 @@ launch=
 其中x.x.x.x2为从服务器ns2.some.host的ip地址
 
 
-在从服务器(ns2.some.host)上配置
+### Slave ns2.some.host
 
 ```
 # vim /etc/powerdns/pdns.conf
