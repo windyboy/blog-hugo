@@ -3,6 +3,9 @@ export LANG=en_US
 
 echo -e "\033[0;32mDeploying updates to GitHub...\033[0m"
 
+# remove public contents
+rm -rf public/*
+
 # Build the project.
 hugo # if using a theme, replace with `hugo -t <YOURTHEME>`
 
