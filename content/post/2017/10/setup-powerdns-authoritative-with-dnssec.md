@@ -467,8 +467,8 @@ some.host.              86400 IN RRSIG NSEC 13 2 86400 (
 
 ## 参考资料
 * [How To Install and Configure PowerDNS with a MariaDB Backend on Ubuntu 14.04] (https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-powerdns-with-a-mariadb-backend-on-ubuntu-14-04)
-* [How To Configure DNS Replication on a Slave PowerDNS Server on Ubuntu 14.04](https://www.digitalocean.com/community/tutorials/how-to-configure-dns-replication-on-a-slave-powerdns-server-on-ubuntu-14-04)
-* [PowerDNS and PowerAdmin Set-up w/ Ubuntu 16.04](http://mindwatering.com/SupportRef.nsf/webpg/9F706A2177A497FE8525812D00041654) 
+* [Running PowerDNS Admin on Ubuntu 16.04 Ubuntu 18.04](https://github.com/ngoduykhanh/PowerDNS-Admin/wiki/Running-PowerDNS-Admin-on-Ubuntu-16.04---Ubuntu-18.04)
+* [Using PowerDNS Admin with PostgreSQL](https://github.com/ngoduykhanh/PowerDNS-Admin/wiki/Using-PowerDNS-Admin-with-PostgreSQL) 
 * 官方安装文档 https://doc.powerdns.com/authoritative/installation.html
 
 
