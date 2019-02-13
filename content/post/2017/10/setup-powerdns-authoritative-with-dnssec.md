@@ -349,9 +349,9 @@ launch=
 ```
 
 
-### 使用[web]界面创建 master zone
+### 使用[web]界面创建 master domain
 
-登录到[web]的网页， 选择Add master zone的菜单，进入新建向导的网页, 在zone里输入域名 some.host
+登录到[web]的网页， 选择Add master e的菜单，进入新建向导的网页, 在zone里输入域名 some.host
 
 点击，list zone, 选择刚才创建的some.host, 这里系统会创建SOA记录，如：
 
