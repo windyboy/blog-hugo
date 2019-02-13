@@ -475,7 +475,7 @@ some.host.              86400 IN RRSIG NSEC 13 2 86400 (
 ## VPS 推荐
 * [linode 东京] (https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66)
 * [bandwagonhost 中国优化] (https://bandwagonhost.com/aff.php?aff=20451)
-* [dgchost 新加波] (https://www.dgchost.net/client/aff.php?aff=226)
+* [cubecloud] (https://www.cubecloud.net/aff.php?aff=963)
 
 
 
