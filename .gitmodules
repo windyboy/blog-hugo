@@ -2,8 +2,7 @@
     path = themes/even
 	url = https://github.com/olOwOlo/hugo-theme-even.git
 	branch = master
-
 [submodule "public"]
 	path = public
 	url = git@github.com:windyboy/windyboy.github.io.git
-	branch = github-pages
+	branch = master
