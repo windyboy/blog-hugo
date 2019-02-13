@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>powerdns-admin on 后花园</title>
+    <link>https://windyboy.github.io/tags/powerdns-admin/</link>
+    <description>Recent content in powerdns-admin on 后花园</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>windyboy © 2016-2019 版权所有</copyright>
+    <lastBuildDate>Mon, 09 Oct 2017 16:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://windyboy.github.io/tags/powerdns-admin/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>使用powerdns搭建自己安全的域名解析服务</title>
+      <link>https://windyboy.github.io/post/2017/10/setup-powerdns-authoritative-with-dnssec/</link>
+      <pubDate>Mon, 09 Oct 2017 16:00:00 +0800</pubDate>
+      
+      <guid>https://windyboy.github.io/post/2017/10/setup-powerdns-authoritative-with-dnssec/</guid>
+      <description>概况 起因： cloudxns停止了面向个人的服务 解析服务需要提供两个独立的IP，一主一从提供解析服务 两个服务器IP地址要注册到域名注册商的服务</description>
+    </item>
+    
+  </channel>
+</rss>
