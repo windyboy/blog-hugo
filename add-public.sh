@@ -1,1 +1,1 @@
-git submodule add -b github-pages git@github.com:windyboy/windyboy.github.io.git public
+git submodule add -f -b master git@github.com:windyboy/windyboy.github.io.git public
