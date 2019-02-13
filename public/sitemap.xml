@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml-stylesheet type="text/xsl" href="https://windyboy.github.io/sitemap.xsl"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>https://windyboy.github.io/post/2017/10/setup-powerdns-authoritative-with-dnssec/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/post/2016/09/tomcat-keystore-using-letsencrypt-certs/</loc>
+    <lastmod>2016-09-28T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/post/2016/05/proxy-with-nghttpx-squid/</loc>
+    <lastmod>2016-05-24T15:13:14+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/categories/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/post/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/authoritative/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/cloudxns/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/dns/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/dnssec/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/http2/</loc>
+    <lastmod>2016-05-24T15:13:14+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/keystore/</loc>
+    <lastmod>2016-09-28T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/letsencrypt/</loc>
+    <lastmod>2016-09-28T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/nghttpx/</loc>
+    <lastmod>2016-05-24T15:13:14+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/postgresql/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/powerdns/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/powerdns-admin/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/proxy/</loc>
+    <lastmod>2016-05-24T15:13:14+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/squid/</loc>
+    <lastmod>2016-05-24T15:13:14+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/ssl/</loc>
+    <lastmod>2016-09-28T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/tags/tomcat/</loc>
+    <lastmod>2016-09-28T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://windyboy.github.io/categories/%E6%8A%80%E6%9C%AF/</loc>
+    <lastmod>2017-10-09T16:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+</urlset>
