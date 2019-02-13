@@ -237,14 +237,6 @@ server {
 # systemctl restart nginx
 ```
 
-* 使用Git安装软件
-
-```
-# git clone https://github.com/poweradmin/poweradmin.git /var/www/html/pdns/
-# chown -R www-data: /var/www/html/pdns/
-# sudo service nginx reload
-```
-
 * 打开PowerDNS的API
 
 ```
@@ -349,11 +341,11 @@ launch=
 ```
 
 
-### 使用[web]界面创建 master domain
+### 使用[powerdns-admin]界面创建域名
 
-登录到[web]的网页， 选择Add master e的菜单，进入新建向导的网页, 在zone里输入域名 some.host
+登录到[powerdns-admin]的网页， 选择New Domain，进入新建向导的网页, 在 name 里输入域名 some.host, type 设置为 master, SOA-EDIT-API 默认 DEFAULT
 
-点击，list zone, 选择刚才创建的some.host, 这里系统会创建SOA记录，如：
+点击Dashboard 回到主界面, 从列表中选择刚才创建的域名 some.host
 
 ```
 some.host	SOA	ns1.some.host hostmaster.some.host 2017101100 28800 7200 604800 86400
