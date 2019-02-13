@@ -18,7 +18,7 @@ pygmentsCodefencesGuessSyntax = true
 hasCJKLanguage = true     # has chinese/japanese/korean ? # 自动检测是否包含 中文\日文\韩文
 paginate = 5                                              # 首页每页显示的文章数
 googleAnalytics = "UA-78513355-1"      # UA-XXXXXXXX-X
-copyright = "windyboy © 2016-2017 Copyright Text"
+copyright = "windyboy © 2016-2019 版权所有"
 
 
 [author]                  # essential                     # 必需
