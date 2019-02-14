@@ -1,7 +1,7 @@
 +++
 Categories = ["技术"]
-Tags = ["dns", "dnssec", "powerdns","postgresql", "authoritative", "cloudxns","powerdns-admin"]
-date = "2017-10-09T16:00:00+08:00"
+Tags = ["dns", "dnssec", "powerdns","postgresql", "authoritative", "cloudxns","powerdns-admin","master","slave","dnssec"]
+date = "2019-02-14T10:00:00+08:00"
 title = "使用powerdns搭建自己安全的域名解析服务"
 disqusShortname = "windyboy"
 
