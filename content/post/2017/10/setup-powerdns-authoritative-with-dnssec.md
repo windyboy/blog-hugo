@@ -9,11 +9,10 @@ disqusShortname = "windyboy"
 
 ## 概况
 
-* 起因： [cloudxns]停止了面向个人的服务 
-* 解析服务需要提供两个独立的IP，一主一从提供解析服务
-* 两个服务器IP地址要注册到域名注册商的服务里，解决先有鸡还是先有蛋的问题
+* 解析服务需要提供两个独立的IP，一主(master)一从(slave)提供解析服务
+* 两个NS服务器IP地址要注册到域名注册商的服务里，解决先有鸡还是先有蛋的问题
 * DNSSEC的key也要注册到注册商
-* 使用[postgresql]替代[mariadb]原因在于，在目前这个版本中，日志里总是出现连接断开的警告
+* 安装 [powerdns-admin] 管理域名
 
 ## 安装软件
 
@@ -29,7 +28,7 @@ disqusShortname = "windyboy"
 ```
 # vim /etc/apt/sources.list.d/pdns.list
 
-deb [arch=amd64] http://repo.powerdns.com/debian stretch-auth-master main
+deb [arch=amd64] http://repo.powerdns.com/debian stretch-rec-41 main
 ```
 
 * 屏蔽debian自带的pdns
