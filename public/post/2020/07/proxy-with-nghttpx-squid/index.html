@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="theme-color" content="#494f5c">
+	<meta name="msapplication-TileColor" content="#494f5c">
+<meta itemprop="name" content="nghttpx搭配squid科学浏览（更新debian）">
+<meta itemprop="description" content="概况 使用通用的https代理访问互联网 受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网 服务器 服务器上部署代理工具 nghttp2（nghttpx server">
+<meta itemprop="datePublished" content="2020-07-17T15:13:14&#43;08:00" />
+<meta itemprop="dateModified" content="2020-07-17T15:53:34&#43;08:00" />
+<meta itemprop="wordCount" content="1488">
+
+
+
+<meta itemprop="keywords" content="nghttpx,squid,proxy,http2," /><meta property="og:title" content="nghttpx搭配squid科学浏览（更新debian）" />
+<meta property="og:description" content="概况 使用通用的https代理访问互联网 受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网 服务器 服务器上部署代理工具 nghttp2（nghttpx server" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://windyboy.github.io/post/2020/07/proxy-with-nghttpx-squid/" />
+<meta property="article:published_time" content="2020-07-17T15:13:14+08:00" />
+<meta property="article:modified_time" content="2020-07-17T15:53:34+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="nghttpx搭配squid科学浏览（更新debian）"/>
+<meta name="twitter:description" content="概况 使用通用的https代理访问互联网 受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网 服务器 服务器上部署代理工具 nghttp2（nghttpx server"/>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
+	<link rel="shortcut icon" href="/favicon.ico">
+
+	<title>nghttpx搭配squid科学浏览（更新debian）</title>
+	<link rel="stylesheet" href="https://windyboy.github.io/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css" integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin="anonymous">
+	
+</head>
+
+<body id="page">
+	
+	<header id="site-header" class="animated slideInUp">
+		<div class="hdr-wrapper section-inner">
+			<div class="hdr-left">
+				<div class="site-branding">
+					<a href="https://windyboy.github.io">后花园</a>
+				</div>
+				<nav class="site-nav hide-in-mobile">
+					
+				<a href="https://windyboy.github.io/">首页</a>
+				<a href="https://windyboy.github.io/post/">帖子</a>
+				<a href="https://windyboy.github.io/tags/">标签</a>
+				<a href="https://windyboy.github.io/categories/">分类</a>
+
+				</nav>
+			</div>
+			<div class="hdr-right hdr-icons">
+				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/windysylph" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+			</div>
+		</div>
+	</header>
+	<div id="mobile-menu" class="animated fast">
+		<ul>
+			<li><a href="https://windyboy.github.io/">首页</a></li>
+			<li><a href="https://windyboy.github.io/post/">帖子</a></li>
+			<li><a href="https://windyboy.github.io/tags/">标签</a></li>
+			<li><a href="https://windyboy.github.io/categories/">分类</a></li>
+		</ul>
+	</div>
+
+
+	<main class="site-main section-inner thin animated fadeIn faster">
+		<h1>nghttpx搭配squid科学浏览（更新debian）</h1>
+		<div class="content">
+			<h2 id="概况">概况<a href="#概况" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p>使用通用的https代理访问互联网</p>
+<p>受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网</p>
+<ul>
+<li>
+<p>服务器</p>
+<p>服务器上部署代理工具 <a href="https://nghttp2.org" title="nghttp2">nghttp2</a>（nghttpx server） ，缓存服务<a href="http://www.squid-cache.org" title="squid">squid</a>
+安装<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>证书</p>
+</li>
+<li>
+<p>客户端</p>
+<p>客户端可以不安装特别软件，直接设置proxy就可以，在服务端如果开启客户端认证，需要在客户端安装客户证书</p>
+<p>https proxy client ==&gt; https 服务</p>
+</li>
+<li>
+<p>主要工具</p>
+<ul>
+<li>https proxy 服务器 <a href="https://nghttp2.org" title="nghttp2">nghttp2</a></li>
+<li>certbot 安装<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>证书</li>
+<li>缓存服务器 <a href="http://www.squid-cache.org" title="squid">squid</a></li>
+<li>客户端证书生成工具 <a href="https://github.com/OpenVPN/easy-rsa" title="easyrsa">easyrsa</a></li>
+<li>客户端证书导入导出 <a href="https://www.openssl.org" title="openssl">openssl</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="安装">安装<a href="#安装" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h3 id="centos-7">centos 7<a href="#centos-7" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<pre><code>#cat /etc/redhat-release 
+CentOS Linux release 7.2.1511 (Core)
+</code></pre><ul>
+<li>
+<p>基础软件(编译)</p>
+<p>如果使用epel的源安装，首先安装epel</p>
+<pre><code># yum install epel-release
+# yum install openssl git-core
+</code></pre><pre><code>
+</code></pre></li>
+<li>
+<p><a href="https://nghttp2.org" title="nghttp2">nghttp2</a> <a href="http://www.squid-cache.org" title="squid">squid</a></p>
+<p>使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序</p>
+<pre><code># yum install nghttp2 squid
+</code></pre><pre><code>
+  nghttp2 也可以自编译源码来安装，epel安装的版本是1.7,通过编译可以安装1.9
+
+  &gt;
+  &gt;```
+  &gt;sudo yum groupinstall &quot;Development Tools&quot;
+  &gt;sudo yum install libev libev-devel zlib zlib-devel openssl openssl-devel git
+  &gt;git clone https://github.com/nghttp2/nghttp2.git
+  &gt;cd nghttp2
+  &gt;autoreconf -i
+  &gt;automake
+  &gt;autoconf
+  &gt;./configure
+  &gt;make
+  &gt;sudo make install
+  &gt;```
+  &gt;
+
+  默认安装位置是 ```/usr/local/bin```
+
+  ***在centos 7的环境正不能使用最新版的1.11.0-DEV，需要使用1.9.x的版本。在clone项目以后需要checkout 1.9.x的版本***
+
+  ```git checkout v1.9.x```
+
+  然后再执行编译的操作,编译安装完成以后，检查一下版本
+
+  ```# /usr/local/bin/nghttpx -v```
+
+</code></pre></li>
+</ul>
+<h3 id="debian-10-ubuntu">debian 10 （ubuntu）<a href="#debian-10-ubuntu" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<pre><code># lsb_release -a
+No LSB modules are available.
+Distributor ID: Debian
+Description:    Debian GNU/Linux 10 (buster)
+Release:        10
+Codename:       buster
+</code></pre><pre><code>sudo apt install nghttp2
+
+sudo apt install python-certbot-apache -t buster-backports
+</code></pre><p>安装<a href="https://certbot.eff.org" title="certbot">certbot</a>会附带安装一个apache的服务器，需要注意，如果有web的服务，需要禁止掉，申请证书的时候可以临时启动一个
+编译（略）</p>
+<ul>
+<li>
+<p><a href="https://github.com/OpenVPN/easy-rsa" title="easyrsa">easyrsa</a></p>
+<p>克隆easyrsa源码</p>
+<pre><code># git clone https://github.com/OpenVPN/easy-rsa.git
+</code></pre><pre><code>	
+  把easyrsa 复制到/opt/中完成安装
+</code></pre><pre><code>  # cd easy-rsa/
+  # cp -r easyrsa3 /opt/
+</code></pre><pre><code></code></pre></li>
+</ul>
+<h2 id="配置">配置<a href="#配置" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h3 id="证书">证书<a href="#证书" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<ul>
+<li>
+<p>https 证书</p>
+<p>服务器端证书可以使用<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>提供的免费证书。</p>
+<p><del>配置<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>证书的时候可以使用<a href="https://github.com/lukas2511/letsencrypt.sh">letsencrypt.sh</a>的脚本,可以简化配置的过程。</del></p>
+<p>使用<a href="https://certbot.eff.org" title="certbot">certbot</a>配置</p>
+<pre><code>sudo certbot certonly -d your.domain
+How would you like to authenticate with the ACME CA?
+1: Apache Web Server plugin (apache) 
+2: Nginx Web Server plugin (nginx)
+3: Spin up a temporary webserver (standalone) 
+4: Place files in webroot directory (webroot)
+</code></pre><pre><code></code></pre></li>
+</ul>
+<p>申请证书的时候需要在80端口开启一个web服务，如果使用之前安装的apache可以选1，同样也可以选择nginx，如果没有web服务，也可以选3，临时启动一个服务</p>
+<ul>
+<li>客户端验证证书</li>
+</ul>
+<p>自己做一个ca，自行签发客户端证书，使用easyrsa 配置客户端证书</p>
+<pre><code># cd /opt/easyrsa3
+# mv vars.example vars
+</code></pre><p>编辑vars文件，去掉前面的注释，编辑中主要的变量</p>
+<pre><code>set_var EASYRSA_REQ_COUNTRY    &quot;US&quot;
+set_var EASYRSA_REQ_PROVINCE   &quot;California&quot;
+set_var EASYRSA_REQ_CITY       &quot;San Francisco&quot;
+set_var EASYRSA_REQ_ORG        &quot;Copyleft Certificate Co&quot;
+set_var EASYRSA_REQ_EMAIL      &quot;me@example.net&quot;
+set_var EASYRSA_REQ_OU         &quot;My Organizational Unit&quot;
+</code></pre><p>生成客户端证书</p>
+<pre><code># ./easyrsa init-pki
+# ./easyrsa build-ca nopass
+# ./easyrsa gen-dh
+# ./easyrsa build-client-full client-me nopass
+</code></pre><p>导出CA证书</p>
+<pre><code># openssl x509 -in pki/ca.crt -out ca.pem -outform PEM
+</code></pre><p>导出客户端证书</p>
+<pre><code># openssl pkcs12 -export -clcerts -in pki/issued/client-me.crt -inkey pki/private/client-me.key -out client-me.p12
+# openssl pkcs12 -in client-me.p12 -out client-me.pem -clcerts
+</code></pre><p>客户端电脑导入ca和客户端证书</p>
+<p>最终生成ca.pem, client-me.pem两个证书文件，复制到客户端，并导入。
+ca.pem导入为可信任的证书颁发机构，client-me.pem导入为信任证书。</p>
+<h3 id="代理">代理<a href="#代理" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<ul>
+<li>
+<p>创建nghttpx的配置文件</p>
+<pre><code>$ sudo mkdir /etc/nghttpx
+$ sudo touch /etc/nghttpx/nghttpx.conf
+</code></pre><pre><code></code></pre></li>
+<li>
+<p>编辑配置文件 nghttpx.conf</p>
+<pre><code>frontend=0.0.0.0,443;tls
+backend=127.0.0.1,3128;no-tls
+#服务器证书
+private-key-file=/etc/letsencrypt/live/[domain]/privkey.pem
+certificate-file=/etc/letsencrypt/live/[domain]/fullchain.pem
+#客户端验证
+dh-param-file=/etc/nghttpx/dh.pem
+verify-client-cacert=/etc/nghttpx/ca.pem
+#代理
+http2-proxy=yes
+no-via=yes
+no-ocsp=yes
+no-host-rewrite=yes
+add-x-forwarded-for=yes
+strip-incoming-x-forwarded-for=yes
+</code></pre><pre><code>
+  其中[domain]为服务器的域名，privkey.pem, fullchain.pem是letsencrypt生成的服务器证书。dh.pem, ca.pem是客户端证书
+
+</code></pre></li>
+<li>
+<p>ngttpx服务</p>
+<pre><code>$ sudo vi /etc/systemd/system/nghttpx.service
+</code></pre><pre><code>  编辑内容
+
+</code></pre><pre><code>  [Unit] 
+  Description=nghttpx 
+  After=network.target 
+	 
+  [Service] 
+  Type=simple 
+  ExecStart=/usr/local/bin/nghttpx --conf=/etc/nghttpx/nghttpx.conf
+  ExecReload=/bin/kill -SIGUSR1 ${MAINPID}
+  ExecStop=/bin/kill -SIGQUIT ${MAINPID}
+	 
+  [Install] 
+  WantedBy=multi-user.target
+</code></pre><pre><code>
+  服务
+</code></pre><pre><code>  $ sudo systemctl daemon-reload
+  $ sudo systemctl start nghttpx
+  $ sudo systemctl enable nghttpx
+</code></pre><pre><code>
+</code></pre></li>
+</ul>
+<h3 id="缓存">缓存<a href="#缓存" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<p>通过yum安装的squid服务，默认配置基本上已经满足要求，需要做一点小修改</p>
+<ul>
+<li>
+<p>编辑配置</p>
+<pre><code>$ sudo vi /etc/squid/squid.conf
+</code></pre><pre><code>
+  在配置文件尾部加上
+</code></pre><pre><code>  via off
+  forwarded_for delete
+  access_log none
+</code></pre><pre><code>
+</code></pre></li>
+<li>
+<p>重启服务</p>
+<pre><code>$ sudo systemctl restart squid
+</code></pre><pre><code>
+</code></pre></li>
+</ul>
+<h2 id="参考资料">参考资料<a href="#参考资料" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<ul>
+<li>nghttpx 官方指引 <a href="https://nghttp2.org/documentation/nghttpx-howto.html">https://nghttp2.org/documentation/nghttpx-howto.html</a></li>
+<li>谷歌上另外一篇参考的nghttpx+squid <a href="https://wzyboy.im/post/1052.html">https://wzyboy.im/post/1052.html</a></li>
+<li>nghttpx 的配置，证书，服务脚本 <a href="https://blog.apar.jp/linux/2584/">https://blog.apar.jp/linux/2584/</a></li>
+<li>centos 编译 nghttp2 <a href="https://gist.github.com/sonots/2bdf6cd26c23ef44db71">https://gist.github.com/sonots/2bdf6cd26c23ef44db71</a></li>
+<li>certbot on debian 10 <a href="https://www.tecmint.com/setup-free-ssl-certificate-for-apache-on-debian-10/">https://www.tecmint.com/setup-free-ssl-certificate-for-apache-on-debian-10/</a></li>
+<li>免费证书提供 <a href="https://letsencrypt.org/">https://letsencrypt.org/</a></li>
+<li>client 证书生成 <a href="https://gist.github.com/mtigas/952344">https://gist.github.com/mtigas/952344</a></li>
+</ul>
+<h2 id="vps引用">VPS引用<a href="#vps引用" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<ul>
+<li>[linode 东京] (<a href="https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66">https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66</a>)</li>
+<li>[bandwagonhost 中国优化] (<a href="https://bandwagonhost.com/aff.php?aff=20451">https://bandwagonhost.com/aff.php?aff=20451</a>)</li>
+<li>[cubenet] (<a href="https://www.cubecloud.net/aff.php?aff=963">https://www.cubecloud.net/aff.php?aff=963</a>)</li>
+</ul>
+
+		</div>
+	</main>
+
+	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
+		<p>&copy; 2020 <a href="https://windyboy.github.io">windyboy</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+		<p>
+			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://windyboy.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+		</p>
+	</footer>
+
+
+
+	<script src="https://windyboy.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
+	
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-78513355-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+</body>
+
+</html>
