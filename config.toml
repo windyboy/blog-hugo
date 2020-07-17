@@ -12,6 +12,7 @@ copyright = "windyboy © 2016-2020 版权所有" # This message is only used by 
 enableEmoji = true  # Shorthand emojis in content files - https://gohugo.io/functions/emojify/
 googleAnalytics = "UA-78513355-1"
 disqusShortname = "windyboy"
+publishDir = "public"
 
 
 [author]
