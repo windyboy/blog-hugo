@@ -1,5 +1,5 @@
 baseURL = "https://windyboy.github.io"
-languageCode = "zh-cn"
+#languageCode = "zh-cn"
 defaultContentLanguage = "cn"
 title = "后花园"
 theme = "hermit"
@@ -14,14 +14,21 @@ googleAnalytics = "UA-78513355-1"
 disqusShortname = "windyboy"
 publishDir = "public"
 
+[languages]
+  [languages.en]
+  title = "back yard"
+  [languages.cn]
+  title = "后花园"
+
 
 [author]
   name = "windyboy"
 
 [blackfriday]
-  # hrefTargetBlank = true
-  # noreferrerLinks = true
-  # nofollowLinks = true
+  noreferrerLinks = true
+  nofollowLinks = true
+  angledQuotes = true
+  hrefTargetBlank = true
 
 [taxonomies]
   tag = "tags"
@@ -45,7 +52,7 @@ publishDir = "public"
   # bgImg = ""  # Homepage background-image URL
 
   # Prefix of link to the git commit detail page. GitInfo must be enabled.
-  # gitUrl = "https://github.com/username/repository/commit/"
+  gitUrl = "https://github.com/windyboy/windyboy.github.io/commit/"
 
   # Toggle this option need to rebuild SCSS, requires extended version of Hugo
   justifyContent = false  # Set "text-align: justify" to .content.
