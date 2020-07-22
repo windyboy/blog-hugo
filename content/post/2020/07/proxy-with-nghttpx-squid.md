@@ -3,7 +3,7 @@ Categories = ["技术"]
 Tags = ["nghttpx", "squid", "proxy", "http2"]
 date = "2020-07-17T15:13:14+08:00"
 title = "nghttpx搭配squid科学浏览（更新debian）"
-disqus_shortname = "windyboy"
+comments = true
 +++
 
 

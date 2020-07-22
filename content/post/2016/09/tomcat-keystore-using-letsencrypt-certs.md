@@ -4,6 +4,7 @@ Tags = [ "tomcat",  "ssl",  "keystore",  "letsencrypt" ]
 date = "2016-09-28T16:00:00+08:00"
 title = "tomcat 以 keystore 的方式使用 letsencrypt 证书"
 disqus_shortname = "windyboy"
+comments = true
 +++
 
 ## 概况

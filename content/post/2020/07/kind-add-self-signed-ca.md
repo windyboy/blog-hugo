@@ -3,7 +3,8 @@ title : "Kind添加私有仓库自签名CA证书"
 Tags : ["kind", "docker", "kubernetes", "k8s","selfsigned","ca","certificate","registry","x509"]
 date : 2020-07-20T10:20:16+08:00
 Categories : ["技术"]
-images:
+DisqusShortname : "windyboy"
+comments: true
 ---
 
 ## 概况

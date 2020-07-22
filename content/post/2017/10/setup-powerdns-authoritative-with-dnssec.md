@@ -4,7 +4,7 @@ Tags = ["dns", "dnssec", "powerdns","postgresql", "authoritative", "cloudxns","p
 date = "2019-02-14T10:00:00+08:00"
 title = "使用powerdns搭建自己安全的域名解析服务"
 disqusShortname = "windyboy"
-
+comments = true
 +++
 
 ## 概况
