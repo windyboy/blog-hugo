@@ -11,7 +11,7 @@ rssLimit = 10  # Maximum number of items in the RSS feed.
 copyright = "windyboy © 2016-2020 版权所有" # This message is only used by the RSS template.
 enableEmoji = true  # Shorthand emojis in content files - https://gohugo.io/functions/emojify/
 googleAnalytics = "UA-78513355-1"
-disqusShortname = "windyboy"
+#disqusShortname = "windyboy"
 publishDir = "public"
 
 [languages]
@@ -62,6 +62,11 @@ publishDir = "public"
 
   # Social Icons
   # Check https://github.com/Track3/hermit#social-icons for more info.
+
+  remark42SiteID = "backyard"
+  remark42Url = "https://remark.windy.me"
+  comments = true
+
   [[params.social]]
     name = "twitter"
     url = "https://twitter.com/windysylph"
