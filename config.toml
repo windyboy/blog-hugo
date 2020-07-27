@@ -1,5 +1,5 @@
 baseURL = "https://windyboy.github.io/"
-#languageCode = "zh-cn"
+languageCode = "zh-cn"
 defaultContentLanguage = "cn"
 title = "后花园"
 theme = "hermit"
@@ -66,6 +66,7 @@ publishDir = "public"
   remark42SiteID = "backyard"
   remark42Url = "https://remark.windy.me"
   comments = true
+  remark42ShowComments = 10
 
   [[params.social]]
     name = "twitter"
