@@ -14,7 +14,7 @@ Tags: ["drone","x509","devops"]
 2. push docker 镜像， release 发布证书不信任
 
 ## 解决方法
-### 对于默认的clone
+### clone
 如果不是把clone作为一个step，可以直接使用skip_verify: true忽略验证
 ```
 clone:
@@ -23,7 +23,7 @@ clone:
 ```
 当然也可以使用下面挂载主机证书的方法
 
-### 其他证书不信任
+### 证书不信任
 
 1. 首先把登陆drone的用户设置成admin
 在drone server启动的环境变量中设置
