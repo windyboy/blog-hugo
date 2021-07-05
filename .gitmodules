@@ -1,7 +1,3 @@
-[submodule "public"]
-	path = public
-	url = https://github.com/windyboy/windyboy.github.io.git
-	branch = master
 [submodule "themes/hermit"]
 	path = themes/hermit
 	url = https://github.com/windyboy/hermit.git
