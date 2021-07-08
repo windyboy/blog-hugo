@@ -18,15 +18,15 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
-          hugo-version: '0.84.4'
+          hugo-version: 'latest'
           extended: true
 
       - name: Build
         run: hugo --minify
 
-      - name: Deploy
-        uses:  windyboy/windyboy.github.io@master
-        if: github.ref == 'refs/heads/master'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+      #- name: Deploy
+      #  uses:  windyboy/windyboy.github.io@master
+      #  if: github.ref == 'refs/heads/master'
+      #  with:
+      #    github_token: ${{ secrets.GITHUB_TOKEN }}
+      #    publish_dir: ./public
