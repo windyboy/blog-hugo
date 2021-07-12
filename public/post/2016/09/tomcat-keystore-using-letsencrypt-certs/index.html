@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html><head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>tomcat 以 keystore 的方式使用 letsencrypt 证书 - 后花园</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="概况 apache tomcat 应用服务器（在不使用apr连接器时）使用SSL证书的时候使用的是java专属的证书管理方式keystore, 并不能直接使用letse" />
+	<meta property="og:image" content=""/>
+	<meta property="og:title" content="tomcat 以 keystore 的方式使用 letsencrypt 证书" />
+<meta property="og:description" content="概况 apache tomcat 应用服务器（在不使用apr连接器时）使用SSL证书的时候使用的是java专属的证书管理方式keystore, 并不能直接使用letse" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://windyboy.github.io/post/2016/09/tomcat-keystore-using-letsencrypt-certs/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2016-09-28T16:00:00+08:00" />
+<meta property="article:modified_time" content="2020-07-22T14:25:01+08:00" /><meta property="og:site_name" content="后花园" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="tomcat 以 keystore 的方式使用 letsencrypt 证书"/>
+<meta name="twitter:description" content="概况 apache tomcat 应用服务器（在不使用apr连接器时）使用SSL证书的时候使用的是java专属的证书管理方式keystore, 并不能直接使用letse"/>
+<script src="https://windyboy.github.io/js/feather.min.js"></script>
+	
+	
+        <link href="https://windyboy.github.io/css/fonts.b685ac6f654695232de7b82a9143a46f9e049c8e3af3a21d9737b01f4be211d1.css" rel="stylesheet">
+	
+
+	
+	<link rel="stylesheet" type="text/css" media="screen" href="https://windyboy.github.io/css/main.2f9b5946627215dc1ae7fa5f82bfc9cfcab000329136befeea5733f21e77d68f.css" />
+	
+	
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="https://windyboy.github.io/">后花园</a>
+	</div>
+	<nav>
+		
+		<a href="/">首页</a>
+		
+		<a href="/post/">帖子</a>
+		
+		<a href="/tags/">标签</a>
+		
+		<a href="/categories/">分类</a>
+		
+	</nav>
+</header>
+
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">tomcat 以 keystore 的方式使用 letsencrypt 证书</h1>
+			<div class="meta">Posted on Sep 28, 2016</div>
+		</div>
+		
+
+		<section class="body">
+			<h2 id="概况">概况</h2>
+<ul>
+<li><a href="https://tomcat.apache.org/" title="apache tomcat">apache tomcat</a> 应用服务器（在不使用apr连接器时）使用SSL证书的时候使用的是java专属的证书管理方式<a href="https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html" title="keystore">keystore</a>, 并不能直接使用<a href="https://letsencrypt.org/" title="letsencrypt">letsencrypt</a>的免费证书。</li>
+<li>要把证书导入<a href="https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html" title="keystore">keystore</a>, 首先需要使用<a href="https://www.openssl.org/" title="openssl">openssl</a>把证书导出到.p12文件中，然后使用keytool把ca倒入为root(alias root)， 把服务器的证书导入为tomcat(alias tomcat)。</li>
+</ul>
+<h2 id="导入证书">导入证书</h2>
+<ul>
+<li>前提</li>
+</ul>
+<p>已经成功申请到有效的证书(使用<a href="https://letsencrypt.org/" title="letsencrypt">letsencrypt</a> 申请有效的服务器证书)。</p>
+<ul>
+<li>使用 openssl 工具，把证书导出到.p12文件中</li>
+</ul>
+<pre><code>  # openssl pkcs12 -export -in cert.pem -inkey privkey.pem \
+  -out cert_and_key.p12 -name tomcat \
+  -CAfile chain.pem -caname root
+  Enter Export Password:
+  Verifying - Enter Export Password:
+</code></pre><p>提示输入导出密码，这里导出密码，可以直接回车，此时密码为空。 如果输入了密码，则在下面导入的时候需要输入相同的密码</p>
+<ul>
+<li>使用keytool导入证书和ca</li>
+</ul>
+<pre><code>  # keytool -importkeystore \
+  -deststorepass &lt;changeit&gt; -destkeypass &lt;changeit&gt; \
+  -destkeystore MyDSKeyStore.jks -srckeystore cert_and_key.p12 \
+  -srcstoretype PKCS12 \
+  -srcstorepass &lt;theExportPasswordAbove&gt; -alias tomcat
+</code></pre><p>注意deststorepass和destkeypass必须相同，否则tomcat无法获取证书</p>
+<pre><code>  # keytool -import -trustcacerts \
+  -srcstorepass &lt;theExportPasswordAbove&gt; \
+  -alias root -file chain.pem -keystore MyKeyStore.jks
+</code></pre><ul>
+<li>配置<a href="https://tomcat.apache.org/" title="apache tomcat">apache tomcat</a></li>
+</ul>
+<pre><code>  # vim conf/server.xml
+  &lt;Connector port=&quot;443&quot; protocol=&quot;org.apache.coyote.http11.Http11Protocol&quot;
+            maxThreads=&quot;150&quot; SSLEnabled=&quot;true&quot; scheme=&quot;https&quot; secure=&quot;true&quot;
+            keystoreFile=&quot;/&lt;path&gt;/MyKeyStore.jks&quot; keystorePass=&quot;&lt;changeit&gt;&quot;
+               clientAuth=&quot;false&quot; sslProtocol=&quot;TLS&quot; /&gt;
+</code></pre><p>keystoreFile 是MyKeyStore.jks文件的绝对路径</p>
+<p><em><strong>keystorePass 是MyKeyStore.jks的storepasss以及keypass, 必须相同</strong></em></p>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li>How to use the certificate for Tomcat <a href="https://community.letsencrypt.org/t/how-to-use-the-certificate-for-tomcat/3677">https://community.letsencrypt.org/t/how-to-use-the-certificate-for-tomcat/3677</a></li>
+<li>keytool - Key and Certificate Management Tool <a href="http://docs.oracle.com/javase/6/docs/technotes/tools/windows/keytool.html">http://docs.oracle.com/javase/6/docs/technotes/tools/windows/keytool.html</a></li>
+<li>Tomcat SSL/TLS Configuration HOW-TO <a href="https://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html">https://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html</a></li>
+<li>letsencrypt.sh 证书制作 <a href="https://www.hshh.org/letsencrypt/letsencrypt.sh_http-01">https://www.hshh.org/letsencrypt/letsencrypt.sh_http-01</a></li>
+<li>免费证书提供 <a href="https://letsencrypt.org/">https://letsencrypt.org/</a></li>
+</ul>
+<h2 id="vps-推荐">VPS 推荐</h2>
+<ul>
+<li>[linode 东京] (<a href="https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66">https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66</a>)</li>
+<li>[bandwagonhost 中国优化] (<a href="https://bandwagonhost.com/aff.php?aff=20451">https://bandwagonhost.com/aff.php?aff=20451</a>)</li>
+<li>[dgchost 新加波] (<a href="https://www.dgchost.net/client/aff.php?aff=226">https://www.dgchost.net/client/aff.php?aff=226</a>)</li>
+</ul>
+
+		</section>
+
+		<div class="post-tags">
+			
+			
+			<nav class="nav tags">
+				<ul class="tags">
+					
+					<li><a href="/tags/tomcat">tomcat</a></li>
+					
+					<li><a href="/tags/ssl">ssl</a></li>
+					
+					<li><a href="/tags/keystore">keystore</a></li>
+					
+					<li><a href="/tags/letsencrypt">letsencrypt</a></li>
+					
+				</ul>
+			</nav>
+			
+			
+		</div>
+	</article>
+</main>
+<footer>
+<hr><a class="soc" href="https://twitter.com/windysylph" title="twitter"><i data-feather=""></i></a>|⚡️
+	2021  windyboy © 2016-2021 版权所有 |  <a href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+</footer>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-78513355-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+<script>
+      feather.replace()
+</script></div>
+    </body>
+</html>

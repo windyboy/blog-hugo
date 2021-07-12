@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html><head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>使用go的graphql本地客户端mutation - 后花园</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="概述 hasura-go-client 的文档中关于mutation部分的描述 For example, to make the following GraphQL mutation: mutation($ep: Episode!, $review: ReviewInput!) { createReview(episode: $ep, review: $review) { stars commentary } } variables { &quot;ep&quot;: &quot;JEDI&quot;, &quot;review&quot;: { &quot;stars&quot;: 5, &quot;commentary&quot;: &quot;This is a great movie!&quot; } } You can define: var m struct { CreateReview struct {" />
+	<meta property="og:image" content=""/>
+	<meta property="og:title" content="使用go的graphql本地客户端mutation" />
+<meta property="og:description" content="概述 hasura-go-client 的文档中关于mutation部分的描述 For example, to make the following GraphQL mutation: mutation($ep: Episode!, $review: ReviewInput!) { createReview(episode: $ep, review: $review) { stars commentary } } variables { &quot;ep&quot;: &quot;JEDI&quot;, &quot;review&quot;: { &quot;stars&quot;: 5, &quot;commentary&quot;: &quot;This is a great movie!&quot; } } You can define: var m struct { CreateReview struct {" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://windyboy.github.io/post/2021/07/write_native_graphql_client_mutation/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2021-07-12T11:14:40+08:00" />
+<meta property="article:modified_time" content="2021-07-12T15:24:09+08:00" /><meta property="og:site_name" content="后花园" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="使用go的graphql本地客户端mutation"/>
+<meta name="twitter:description" content="概述 hasura-go-client 的文档中关于mutation部分的描述 For example, to make the following GraphQL mutation: mutation($ep: Episode!, $review: ReviewInput!) { createReview(episode: $ep, review: $review) { stars commentary } } variables { &quot;ep&quot;: &quot;JEDI&quot;, &quot;review&quot;: { &quot;stars&quot;: 5, &quot;commentary&quot;: &quot;This is a great movie!&quot; } } You can define: var m struct { CreateReview struct {"/>
+<script src="https://windyboy.github.io/js/feather.min.js"></script>
+	
+	
+        <link href="https://windyboy.github.io/css/fonts.b685ac6f654695232de7b82a9143a46f9e049c8e3af3a21d9737b01f4be211d1.css" rel="stylesheet">
+	
+
+	
+	<link rel="stylesheet" type="text/css" media="screen" href="https://windyboy.github.io/css/main.2f9b5946627215dc1ae7fa5f82bfc9cfcab000329136befeea5733f21e77d68f.css" />
+	
+	
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="https://windyboy.github.io/">后花园</a>
+	</div>
+	<nav>
+		
+		<a href="/">首页</a>
+		
+		<a href="/post/">帖子</a>
+		
+		<a href="/tags/">标签</a>
+		
+		<a href="/categories/">分类</a>
+		
+	</nav>
+</header>
+
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">使用go的graphql本地客户端mutation</h1>
+			<div class="meta">Posted on Jul 12, 2021</div>
+		</div>
+		
+
+		<section class="body">
+			<h2 id="概述">概述</h2>
+<p><a href="%22https://github.com/hasura/go-graphql-client%22" title="hasura-go-client">hasura-go-client</a> 的文档中关于mutation部分的描述</p>
+<blockquote>
+<p>For example, to make the following GraphQL mutation:</p>
+</blockquote>
+<pre><code>mutation($ep: Episode!, $review: ReviewInput!) {
+	createReview(episode: $ep, review: $review) {
+		stars
+		commentary
+	}
+}
+variables {
+	&quot;ep&quot;: &quot;JEDI&quot;,
+	&quot;review&quot;: {
+		&quot;stars&quot;: 5,
+		&quot;commentary&quot;: &quot;This is a great movie!&quot;
+	}
+}
+</code></pre><blockquote>
+<p>You can define:</p>
+</blockquote>
+<pre><code>var m struct {
+	CreateReview struct {
+		Stars      graphql.Int
+		Commentary graphql.String
+	} `graphql:&quot;createReview(episode: $ep, review: $review)&quot;`
+}
+variables := map[string]interface{}{
+	&quot;ep&quot;: starwars.Episode(&quot;JEDI&quot;),
+	&quot;review&quot;: starwars.ReviewInput{
+		Stars:      graphql.Int(5),
+		Commentary: graphql.String(&quot;This is a great movie!&quot;),
+	},
+}
+</code></pre><p>当前的版本v0.2.0似乎有出入
+如果模仿这里例子编写代码，并不能得到预期的效果。</p>
+<p>大致上有两个问题：</p>
+<ol>
+<li>传入的struct名称应该是一个以input结尾的类型</li>
+<li>内部的变量必须大写首字母，又必须使用json的说明在转换的时候变成小写</li>
+</ol>
+<h2 id="正确的做法">正确的做法</h2>
+<p>首先在<a href="%22https://hasura.io%22">hasura</a>的服务器上创建数据实体，如果创建的实体名为&quot;data&quot;，<a href="%22https://hasura.io%22">hasura</a>服务器就会生成一些mutation的操作。
+如果是插入一条数据，则需要调用&quot;data_instert_one&quot;的mutation。</p>
+<p>graphql的对应操作为：</p>
+<div class="highlight"><pre class="chroma"><code class="language-graphql" data-lang="graphql"><span class="kd">mutation</span><span class="w"> </span><span class="nc">m</span><span class="p">(</span><span class="nv">$data</span><span class="p">:</span><span class="w"> </span><span class="nc">data_insert_input</span><span class="p">!)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">  </span><span class="py">insert_telegram_one</span><span class="p">(</span><span class="py">object</span><span class="p">:</span><span class="w"> </span><span class="nv">$data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="nc">id</span><span class="w">
+</span><span class="w">  </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="p">{</span><span class="w">
+</span><span class="w">  </span><span class="s">&#34;data&#34;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="s">&#34;text&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;DDDEEDDSS&#34;</span><span class="w">
+</span><span class="w">  </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>这里的例子是插入列名为&quot;text&quot;的数据，返回自动生成的id</p>
+<p>对应的go程序应该是</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">data_insert_input</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Text</span> <span class="nx">graphql</span><span class="p">.</span><span class="nx">String</span> <span class="s">`json:&#34;text&#34;`</span>
+<span class="p">}</span>
+<span class="nx">client</span> <span class="o">:=</span> <span class="nx">graphql</span><span class="p">.</span><span class="nf">NewClient</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+
+<span class="kd">var</span> <span class="nx">mutation</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">InsertTelegramOne</span> <span class="kd">struct</span> <span class="p">{</span>
+        <span class="nx">Id</span> <span class="nx">graphql</span><span class="p">.</span><span class="nx">ID</span>
+    <span class="p">}</span> <span class="s">`graphql:&#34;insert_data_one(object: $data)&#34;`</span>
+<span class="p">}</span>
+
+<span class="nx">variables</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}{</span>
+    <span class="s">&#34;data&#34;</span><span class="p">:</span> <span class="nx">data_insert_input</span><span class="p">{</span>
+        <span class="nx">Text</span><span class="p">:</span> <span class="nx">graphql</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="nx">text</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div><p>这里注意，调用的mutation的名字是&quot;insert_data_one&quot;, 参数固定为&quot;data_insert_input&quot;都是固定的。
+结构内部的变量名必须首字母大小，但必须在json转换的时候注解回小写名称（数据库中列名为小写）
+在variables中定义的名称&quot;data&quot;,则是对应调用中&quot;$data&quot;</p>
+
+		</section>
+
+		<div class="post-tags">
+			
+			
+			<nav class="nav tags">
+				<ul class="tags">
+					
+					<li><a href="/tags/hasura">hasura</a></li>
+					
+					<li><a href="/tags/golang">golang</a></li>
+					
+					<li><a href="/tags/graphql">graphql</a></li>
+					
+				</ul>
+			</nav>
+			
+			
+		</div>
+	</article>
+</main>
+<footer>
+<hr><a class="soc" href="https://twitter.com/windysylph" title="twitter"><i data-feather=""></i></a>|⚡️
+	2021  windyboy © 2016-2021 版权所有 |  <a href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+</footer>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-78513355-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+<script>
+      feather.replace()
+</script></div>
+    </body>
+</html>

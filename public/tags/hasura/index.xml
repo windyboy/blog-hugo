@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>hasura on 后花园</title>
+    <link>https://windyboy.github.io/tags/hasura/</link>
+    <description>Recent content in hasura on 后花园</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>windyboy © 2016-2021 版权所有</copyright>
+    <lastBuildDate>Mon, 12 Jul 2021 11:14:40 +0800</lastBuildDate><atom:link href="https://windyboy.github.io/tags/hasura/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>使用go的graphql本地客户端mutation</title>
+      <link>https://windyboy.github.io/post/2021/07/write_native_graphql_client_mutation/</link>
+      <pubDate>Mon, 12 Jul 2021 11:14:40 +0800</pubDate>
+      
+      <guid>https://windyboy.github.io/post/2021/07/write_native_graphql_client_mutation/</guid>
+      <description>概述 hasura-go-client 的文档中关于mutation部分的描述 For example, to make the following GraphQL mutation: mutation($ep: Episode!, $review: ReviewInput!) { createReview(episode: $ep, review: $review) { stars commentary } } variables { &amp;quot;ep&amp;quot;: &amp;quot;JEDI&amp;quot;, &amp;quot;review&amp;quot;: { &amp;quot;stars&amp;quot;: 5, &amp;quot;commentary&amp;quot;: &amp;quot;This is a great movie!&amp;quot; } } You can define: var m struct { CreateReview struct {</description>
+    </item>
+    
+  </channel>
+</rss>
