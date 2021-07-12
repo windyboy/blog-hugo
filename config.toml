@@ -30,6 +30,10 @@ fuse = true # for searchbox. "JSON" must added to output contents. See [outputs]
 math = true # for introducing $KaTEX$
 useChineseFonts = true 
 postDateFormat = "2006-1-2"
+remark42SiteID = "backyard"
+remark42Url = "https://remark.windy.me"
+comments = true
+remark42ShowComments = 10
 
 [menu]
 # Shown in the side menu.
