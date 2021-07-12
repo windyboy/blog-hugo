@@ -1,8 +1,8 @@
 ---
 title: "使用go的graphql本地客户端mutation"
 date: 2021-07-12T11:14:40+08:00
-draft: true
-comments: false
+draft: false
+comments: true
 images:
 Categories: ["技术"]
 tags: ["hasura","golang","graphql"]

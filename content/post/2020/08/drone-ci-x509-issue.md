@@ -4,6 +4,7 @@ date: 2020-08-28T12:39:12+08:00
 draft: false
 comments: true
 images:
+Categories: ["技术"]
 Tags: ["drone","x509","devops"]
 ---
 ##  概述
