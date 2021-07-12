@@ -20,7 +20,7 @@ style = "monokailight"
 unsafe = true
 
 [params]
-#bannerFont = "fonts/exampleFont" 
+bannerFont = "fonts/noto-serif-sc-v7-latin_chinese-simplified-regular" 
 description = """
 Tokiwa-iro is the theme color of this site.
 """ 
