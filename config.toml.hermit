@@ -1,0 +1,113 @@
+baseURL = "https://windyboy.github.io/"
+languageCode = "zh-cn"
+defaultContentLanguage = "cn"
+title = "后花园"
+theme = "hermit"
+enableGitInfo = true
+pygmentsCodefences  = true
+pygmentsUseClasses  = true
+hasCJKLanguage = true  # If Chinese/Japanese/Korean is your main content language, enable this to make wordCount works right.
+rssLimit = 10  # Maximum number of items in the RSS feed.
+copyright = "windyboy © 2016-2021 版权所有" # This message is only used by the RSS template.
+enableEmoji = true  # Shorthand emojis in content files - https://gohugo.io/functions/emojify/
+googleAnalytics = "UA-78513355-1"
+#disqusShortname = "windyboy"
+publishDir = "public"
+footnoteReturnLinkContents = "^"
+
+[languages]
+  [languages.en]
+  title = "back yard"
+  [languages.cn]
+  title = "后花园"
+
+
+[author]
+  name = "windyboy"
+
+[blackfriday]
+  noreferrerLinks = true
+  nofollowLinks = true
+  angledQuotes = true
+  hrefTargetBlank = true
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"  # Categories are disabled by default.
+
+[params]
+  dateform        = "Jan 2, 2006"
+  dateformShort   = "Jan 2"
+  dateformNum     = "2006-01-02"
+  dateformNumTime = "2006-01-02 15:04 -0700"
+
+  # Metadata mostly used in document's head
+  # description = ""
+  # images = [""]
+  keywords = ["Hugo", "tech","geek","server","dns","gfw"]
+  description = "一些私人的玩意"
+  themeColor = "#494f5c"
+
+  homeSubtitle = "各种乱七八糟的搞怪"
+  footerCopyright = ' &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
+  # bgImg = ""  # Homepage background-image URL
+
+  # Prefix of link to the git commit detail page. GitInfo must be enabled.
+  gitUrl = "https://github.com/windyboy/windyboy.github.io/commit/"
+
+  # Toggle this option need to rebuild SCSS, requires extended version of Hugo
+  justifyContent = false  # Set "text-align: justify" to .content.
+
+  # Add custom css
+  # customCSS = ["css/foo.css", "css/bar.css"]
+
+  # Social Icons
+  # Check https://github.com/Track3/hermit#social-icons for more info.
+
+  remark42SiteID = "backyard"
+  remark42Url = "https://remark.windy.me"
+  comments = true
+  remark42ShowComments = 10
+
+  math = true # for introducing $KaTEX$
+env = "production" # for Google Analytics and DISQUS.
+useChineseFonts = true # for font Noto Serif etc.
+
+  [[params.social]]
+    name = "twitter"
+    url = "https://twitter.com/windysylph"
+
+  #[[params.social]]
+  #  name = "instagram"
+  #  url = "https://instagram.com/"
+
+  #[[params.social]]
+    #name = "github"
+   # url = "https://github.com/"
+
+[menu]
+
+    [[menu.main]]             # config your menu              # 配置目录
+    name = "首页"
+    weight = 10
+    identifier = "home"
+    url = "/"
+    [[menu.main]]
+    name = "帖子"
+    weight = 20
+    identifier = "archives"
+    url = "/post/"
+    [[menu.main]]
+    name = "标签"
+    weight = 30
+    identifier = "tags"
+    url = "/tags/"
+    [[menu.main]]
+    name = "分类"
+    weight = 40
+    identifier = "categories"
+    url = "/categories/"
+
+[social]
+bilibili = "http://example.com/"
+github = "http://github.com/"
