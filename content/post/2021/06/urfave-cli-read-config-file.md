@@ -4,6 +4,7 @@ date: 2021-06-28T16:59:45+08:00
 draft: false
 comments: true
 images:
+Categories: ["技术"]
 tags: ["golang","urfave-cli","cli","config"]
 ---
 ## 概述
