@@ -28,7 +28,7 @@ comments = true
 ```
 # vim /etc/apt/sources.list.d/pdns.list
 
-deb [arch=amd64] http://repo.powerdns.com/debian stretch-rec-41 main
+deb [arch=amd64] http://repo.powerdns.com/debian buster-auth-master main
 ```
 
 * 屏蔽debian自带的pdns
@@ -37,13 +37,13 @@ deb [arch=amd64] http://repo.powerdns.com/debian stretch-rec-41 main
 # vim /etc/apt/preferences.d/pdns 
 Package: pdns-*
 Pin: origin repo.powerdns.com
-Pin-Priority: 800
+Pin-Priority: 600
 ```
 
 * 引入官方的key
 
 ```
-# curl https://repo.powerdns.com/FD380FBB-pub.asc | apt-key add - 
+# curl https://repo.powerdns.com/CBC8B383-pub.asc | sudo apt-key add -
 ```
 
 * 安装服务器软件
@@ -51,7 +51,7 @@ Pin-Priority: 800
 
 ```
 # apt-get update
-# apt-get install pdns-server
+# apt-get install pdns-server pdns-backend-pgsql
 ```
 
 ***其他的系统可以到 https://repo.powerdns.com/ 参考响应的安装指引***
@@ -472,7 +472,7 @@ some.host.              86400 IN RRSIG NSEC 13 2 86400 (
 
 
 ## VPS 推荐
-* [linode 东京] (https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66)
+* [10g.biz] (https://10g.biz/aff.php?aff=226)
 * [bandwagonhost 中国优化] (https://bandwagonhost.com/aff.php?aff=20451)
 * [cubecloud] (https://www.cubecloud.net/aff.php?aff=963)
 

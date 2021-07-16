@@ -4,3 +4,6 @@
 [submodule "public"]
 	path = public
 	url = git@github.com:windyboy/windyboy.github.io.git
+[submodule "themes/hugo-theme-tokiwa"]
+	path = themes/hugo-theme-tokiwa
+	url = https://github.com/windyboy/hugo-theme-tokiwa.git
