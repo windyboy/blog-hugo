@@ -1,0 +1,84 @@
+languageCode = "zh-cn"
+defaultContentLanguage = "cn"
+author = "windyboy"
+baseURL = "https://windyboy.github.io/"
+copyright = "Copyright © 2016–2021"
+# disqusShortname = "YOURSHORTNAME"
+enableInlineShortcodes = true
+footnoteReturnLinkContents = "^"
+# googleAnalytics = "UA-FAKE"
+googleAnalytics = "UA-78513355-1"
+hasCJKLanguage = true
+theme = "archie"
+title = "后花园"
+
+[languages]
+  [languages.en]
+  title = "back yard"
+  [languages.cn]
+  title = "后花园"
+
+[markup]
+[markup.highlight]
+style = "monokailight"
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[params]
+bannerFont = "fonts/noto-serif-sc-v7-latin_chinese-simplified-regular" 
+description = """
+各种不知名的花花草草
+""" 
+env = "production" # for Google Analytics and DISQUS.
+favicon = "img/favicon-32x32.png" 
+fuse = true # for searchbox. "JSON" must added to output contents. See [outputs].
+math = true # for introducing $KaTEX$
+useChineseFonts = true 
+postDateFormat = "2006-1-2"
+remark42SiteID = "backyard"
+remark42Url = "https://remark.windy.me"
+comments = true
+remark42ShowComments = 10
+
+[menu]
+# Shown in the side menu.
+[[menu.main]]
+identifier = "post"
+name = "Posts"
+url = "/post/"
+weight = 1
+[[menu.main]]
+name = "Tags"
+url = "/tags/"
+weight = 2
+
+[[menu.main]]
+name = "Categories"
+url = "/categories/"
+weight = 2
+
+[[menu.main]]
+identifier = "about"
+name = "About"
+url = "/about/"
+weight = 3
+
+[taxonomies]
+category = "categories"
+series = "series"
+tag = "tags"
+[social]
+# bilibili = "http://example.com/"
+github = "http://github.com/windyboy"
+# gitlab = "http://gitlab.com/"
+# instagram = "http://example.com/"
+mail = "mailto:windyboy@gmail.com"
+twitter = "https://twitter.com/windysylph"
+# weibo = "http://example.com/"
+# youtube = "http://youtube.com/"
+# zhihu = "http://example.com/"
+# any icon in layouts/partials/svg can be used by the name without the "-line.svg"
+
+[outputs]
+home = ["HTML", "RSS", "JSON"]
