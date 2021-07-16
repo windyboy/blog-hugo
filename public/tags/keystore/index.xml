@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>keystore on 后花园</title>
+    <link>https://windyboy.github.io/tags/keystore/</link>
+    <description>Recent content in keystore on 后花园</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>Copyright © 2016–2021</copyright>
+    <lastBuildDate>Wed, 28 Sep 2016 16:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://windyboy.github.io/tags/keystore/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>tomcat 以 keystore 的方式使用 letsencrypt 证书</title>
+      <link>https://windyboy.github.io/post/2016/09/tomcat-keystore-using-letsencrypt-certs/</link>
+      <pubDate>Wed, 28 Sep 2016 16:00:00 +0800</pubDate>
+      
+      <guid>https://windyboy.github.io/post/2016/09/tomcat-keystore-using-letsencrypt-certs/</guid>
+      <description>&lt;h2 id=&#34;概况&#34;&gt;概况&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://tomcat.apache.org/&#34; title=&#34;apache tomcat&#34;&gt;apache tomcat&lt;/a&gt; 应用服务器（在不使用apr连接器时）使用SSL证书的时候使用的是java专属的证书管理方式&lt;a href=&#34;https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html&#34; title=&#34;keystore&#34;&gt;keystore&lt;/a&gt;, 并不能直接使用&lt;a href=&#34;https://letsencrypt.org/&#34; title=&#34;letsencrypt&#34;&gt;letsencrypt&lt;/a&gt;的免费证书。&lt;/li&gt;
+&lt;li&gt;要把证书导入&lt;a href=&#34;https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html&#34; title=&#34;keystore&#34;&gt;keystore&lt;/a&gt;, 首先需要使用&lt;a href=&#34;https://www.openssl.org/&#34; title=&#34;openssl&#34;&gt;openssl&lt;/a&gt;把证书导出到.p12文件中，然后使用keytool把ca倒入为root(alias root)， 把服务器的证书导入为tomcat(alias tomcat)。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;导入证书&#34;&gt;导入证书&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;前提&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;已经成功申请到有效的证书(使用&lt;a href=&#34;https://letsencrypt.org/&#34; title=&#34;letsencrypt&#34;&gt;letsencrypt&lt;/a&gt; 申请有效的服务器证书)。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用 openssl 工具，把证书导出到.p12文件中&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;  # openssl pkcs12 -export -in cert.pem -inkey privkey.pem \
+  -out cert_and_key.p12 -name tomcat \
+  -CAfile chain.pem -caname root
+  Enter Export Password:
+  Verifying - Enter Export Password:
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;提示输入导出密码，这里导出密码，可以直接回车，此时密码为空。 如果输入了密码，则在下面导入的时候需要输入相同的密码&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用keytool导入证书和ca&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;  # keytool -importkeystore \
+  -deststorepass &amp;lt;changeit&amp;gt; -destkeypass &amp;lt;changeit&amp;gt; \
+  -destkeystore MyDSKeyStore.jks -srckeystore cert_and_key.p12 \
+  -srcstoretype PKCS12 \
+  -srcstorepass &amp;lt;theExportPasswordAbove&amp;gt; -alias tomcat
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;注意deststorepass和destkeypass必须相同，否则tomcat无法获取证书&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  # keytool -import -trustcacerts \
+  -srcstorepass &amp;lt;theExportPasswordAbove&amp;gt; \
+  -alias root -file chain.pem -keystore MyKeyStore.jks
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;配置&lt;a href=&#34;https://tomcat.apache.org/&#34; title=&#34;apache tomcat&#34;&gt;apache tomcat&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;  # vim conf/server.xml
+  &amp;lt;Connector port=&amp;quot;443&amp;quot; protocol=&amp;quot;org.apache.coyote.http11.Http11Protocol&amp;quot;
+            maxThreads=&amp;quot;150&amp;quot; SSLEnabled=&amp;quot;true&amp;quot; scheme=&amp;quot;https&amp;quot; secure=&amp;quot;true&amp;quot;
+            keystoreFile=&amp;quot;/&amp;lt;path&amp;gt;/MyKeyStore.jks&amp;quot; keystorePass=&amp;quot;&amp;lt;changeit&amp;gt;&amp;quot;
+               clientAuth=&amp;quot;false&amp;quot; sslProtocol=&amp;quot;TLS&amp;quot; /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;keystoreFile 是MyKeyStore.jks文件的绝对路径&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;keystorePass 是MyKeyStore.jks的storepasss以及keypass, 必须相同&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;How to use the certificate for Tomcat &lt;a href=&#34;https://community.letsencrypt.org/t/how-to-use-the-certificate-for-tomcat/3677&#34;&gt;https://community.letsencrypt.org/t/how-to-use-the-certificate-for-tomcat/3677&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;keytool - Key and Certificate Management Tool &lt;a href=&#34;http://docs.oracle.com/javase/6/docs/technotes/tools/windows/keytool.html&#34;&gt;http://docs.oracle.com/javase/6/docs/technotes/tools/windows/keytool.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Tomcat SSL/TLS Configuration HOW-TO &lt;a href=&#34;https://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html&#34;&gt;https://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;letsencrypt.sh 证书制作 &lt;a href=&#34;https://www.hshh.org/letsencrypt/letsencrypt.sh_http-01&#34;&gt;https://www.hshh.org/letsencrypt/letsencrypt.sh_http-01&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;免费证书提供 &lt;a href=&#34;https://letsencrypt.org/&#34;&gt;https://letsencrypt.org/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;vps-推荐&#34;&gt;VPS 推荐&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;[linode 东京] (&lt;a href=&#34;https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66&#34;&gt;https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;[bandwagonhost 中国优化] (&lt;a href=&#34;https://bandwagonhost.com/aff.php?aff=20451&#34;&gt;https://bandwagonhost.com/aff.php?aff=20451&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;[dgchost 新加波] (&lt;a href=&#34;https://www.dgchost.net/client/aff.php?aff=226&#34;&gt;https://www.dgchost.net/client/aff.php?aff=226&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>后花园  | 使用powerdns搭建自己安全的域名解析服务</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.84.4" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/favicon-32x32.png" type="image/png" />
+
+	
+
+	
+	
+	
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-78513355-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://windyboy.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://windyboy.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://windyboy.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/windyboy.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://windyboy.github.io/" title="后花园" class="heading font-cursive icon">后花园</a>
+	</h2>
+</div>
+<h1 class="pt-2">使用powerdns搭建自己安全的域名解析服务</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+	
+	
+	
+	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
+		href='/categories/%E6%8A%80%E6%9C%AF'>技术</a>
+	
+	
+	
+
+	
+	&nbsp;&nbsp;
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/dns'>dns</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/dnssec'>dnssec</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/powerdns'>powerdns</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/postgresql'>postgresql</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/authoritative'>authoritative</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/cloudxns'>cloudxns</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/powerdns-admin'>powerdns-admin</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/master'>master</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/slave'>slave</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/dnssec'>dnssec</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2019-02-14T10:00:00&#43;08:00">2019-2-14</time>
+</div>
+
+<hr />
+
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><h2 id="概况">概况</h2>
+<ul>
+<li>解析服务需要提供两个独立的IP，一主(master)一从(slave)提供解析服务</li>
+<li>两个NS服务器IP地址要注册到域名注册商的服务里，解决先有鸡还是先有蛋的问题</li>
+<li>DNSSEC的key也要注册到注册商</li>
+<li>安装 <a href="https://github.com/ngoduykhanh/PowerDNS-Admin" title="web">powerdns-admin</a> 管理域名</li>
+</ul>
+<h2 id="安装软件">安装软件</h2>
+<p><strong>两台服务器都安装相同的软件, authoritative 和 database</strong></p>
+<h3 id="从官方的repohttpsrepopowerdnscom安装authoritative服务软件">从官方的<a href="https://repo.powerdns.com/">repo</a>安装authoritative服务软件</h3>
+<ul>
+<li>创建pdns的源</li>
+</ul>
+<pre><code># vim /etc/apt/sources.list.d/pdns.list
+
+deb [arch=amd64] http://repo.powerdns.com/debian buster-auth-master main
+</code></pre><ul>
+<li>屏蔽debian自带的pdns</li>
+</ul>
+<pre><code># vim /etc/apt/preferences.d/pdns 
+Package: pdns-*
+Pin: origin repo.powerdns.com
+Pin-Priority: 600
+</code></pre><ul>
+<li>引入官方的key</li>
+</ul>
+<pre><code># curl https://repo.powerdns.com/CBC8B383-pub.asc | sudo apt-key add -
+</code></pre><ul>
+<li>安装服务器软件</li>
+</ul>
+<pre><code># apt-get update
+# apt-get install pdns-server pdns-backend-pgsql
+</code></pre><p><em><strong>其他的系统可以到 <a href="https://repo.powerdns.com/">https://repo.powerdns.com/</a> 参考响应的安装指引</strong></em></p>
+<h3 id="安装数据库">安装数据库</h3>
+<ul>
+<li>安装postgresql</li>
+</ul>
+<pre><code># apt install postgresql postgresql-client
+</code></pre><ul>
+<li>初始化数据库账号</li>
+</ul>
+<pre><code># sudo -u postgres psql
+postgres=# create user pdns with password 'mypdnspassword';
+postgres=# create database pdns owner pdns;
+postgres=# grant all privileges on database pdns to pdns;
+postgres=# \q
+</code></pre><ul>
+<li>安装powerdns的backend, 创建数据库</li>
+</ul>
+<pre><code># apt install pdns-backend-pgsql
+# psql -U pdns -d pdns -h 127.0.0.1 -p 5432
+pdns=&gt; \i /usr/share/doc/pdns-backend-pgsql/schema.pgsql.sql
+</code></pre><ul>
+<li>建立主从数据的复制</li>
+</ul>
+<p>在从(Slave)服务器上执行</p>
+<pre><code># psql -U pdns -d pdns -h 127.0.0.1 -p 5432
+
+pdns=&gt; insert into supermasters (ip, nameserver, account) values ('x.x.x.x1', 'ns2.some.host','admin');
+pdns=&gt; insert into domains (name, master, type) values ('some.host', 'x.x.x.x1', 'SLAVE');
+pdns=&gt;\q
+
+# systemctl restart pdns
+</code></pre><p>x.x.x.x1 是主服务器的IP地址</p>
+<h3 id="安装-powerdns-admin">安装 <a href="https://github.com/ngoduykhanh/PowerDNS-Admin" title="web">Powerdns-Admin</a></h3>
+<p><strong>管理界面只安装在主服务器上</strong></p>
+<ul>
+<li>安装基础设施</li>
+</ul>
+<pre><code># apt install -y libmysqlclient-dev libsasl2-dev libldap2-dev libssl-dev libxml2-dev libxslt1-dev libxmlsec1-dev libffi-dev pkg-config apt-transport-https virtualenv build-essential
+# curl -sL https://deb.nodesource.com/setup_10.x | bash -
+# apt-get install -y nodejs
+# curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+# echo &quot;deb https://dl.yarnpkg.com/debian/ stable main&quot; | tee /etc/apt/sources.list.d/yarn.list
+# apt update -y
+# apt install -y yarn
+# apt install nginx
+</code></pre><ul>
+<li>创建数据库</li>
+</ul>
+<pre><code>$ sudo su - postgres
+$ createuser powerdnsadmin
+$ createdb powerdnsadmindb
+$ psql
+postgres=# alter user powerdnsadmin with encrypted password 'powerdnsadmin';
+postgres=# grant all privileges on database powerdnsadmindb to powerdnsadmin;
+</code></pre><ul>
+<li>安装软件</li>
+</ul>
+<pre><code># git clone https://github.com/ngoduykhanh/PowerDNS-Admin.git /opt/web/powerdns-admin
+# cd /opt/web/powerdns-admin
+# virtualenv -p python3 flask
+# source ./flask/bin/activate
+# pip install -r requirements.txt
+# pip install psycopg2
+# cp config_template.py config.py
+
+</code></pre><ul>
+<li>数据库配置</li>
+</ul>
+<pre><code># vi config.py
+SQLALCHEMY_DATABASE_URI = 'postgresql://powerdnsadmin:powerdnsadmin@127.0.0.1/powerdnsadmindb'
+</code></pre><ul>
+<li>运行</li>
+</ul>
+<pre><code># export FLASK_APP=app/__init__.py
+# flask db upgrade
+# yarn install --pure-lockfile
+# flask assets build
+# ./run.py
+</code></pre><ul>
+<li>安装服务</li>
+</ul>
+<pre><code># groupadd powerdnsadmin
+# useradd --system --user-group powerdnsadmin
+# vim /etc/systemd/system/powerdns-admin.service
+
+[Unit]
+Description=PowerDNS-Admin
+After=network.target
+
+[Service]
+Type=simple
+User=powerdnsadmin
+Group=powerdnsadmin
+ExecStart=/opt/web/powerdns-admin/flask/bin/gunicorn --workers 2 --bind unix:/opt/web/powerdns-admin/powerdns-admin.sock app:app
+WorkingDirectory=/opt/web/powerdns-admin
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+# systemctl daemon-reload
+# systemctl start powerdns-admin
+# systemctl enable powerdns-admin
+</code></pre><ul>
+<li>配置反向代理</li>
+</ul>
+<pre><code># vim /etc/nginx/sites-available/pdns
+
+server {
+    server_name pdns.some.local ;
+    listen 80;
+      index                     index.html index.htm index.php;
+  root                      /opt/web/powerdns-admin;
+  access_log                /var/log/nginx/powerdns-admin.local.access.log combined;
+  error_log                 /var/log/nginx/powerdns-admin.local.error.log;
+
+  client_max_body_size              10m;
+  client_body_buffer_size           128k;
+  proxy_redirect                    off;
+  proxy_connect_timeout             90;
+  proxy_send_timeout                90;
+  proxy_read_timeout                90;
+  proxy_buffers                     32 4k;
+  proxy_buffer_size                 8k;
+  proxy_set_header                  Host $host;
+  proxy_set_header                  X-Real-IP $remote_addr;
+  proxy_set_header                  X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_headers_hash_bucket_size    64;
+
+  location ~ ^/static/  {
+    include  /etc/nginx/mime.types;
+    root /opt/web/powerdns-admin/app;
+
+    location ~*  \.(jpg|jpeg|png|gif)$ {
+      expires 365d;
+    }
+
+    location ~* ^.+.(css|js)$ {
+      expires 7d;
+    }
+  }
+
+  location / {
+    proxy_pass            http://unix:/opt/web/powerdns-admin/powerdns-admin.sock;
+    proxy_read_timeout    120;
+    proxy_connect_timeout 120;
+    proxy_redirect        off;
+  }
+}
+
+# ln -s /etc/nginx/sites-available/pdns /etc/nginx/sites-enabled/pdns
+# nginx -t
+# systemctl restart nginx
+</code></pre><ul>
+<li>连接到PowerDNS API</li>
+</ul>
+<pre><code>打开网页 pdns.some.host ， 注册新用户并登陆
+
+打开 API 设置页面，连接到主服务器
+http://pdns.some.host/admin/setting/pdns
+
+PDNS API URL: http://localhost:8081
+PDNS API KEY: somekey
+
+</code></pre><h2 id="配置服务">配置服务</h2>
+<h3 id="配置环境">配置环境</h3>
+<ul>
+<li>配置host文件，强制解析 ns1, ns2</li>
+</ul>
+<pre><code># vim /etc/hosts
+x.x.x.x1   ns1.some.host
+x.x.x.x2   ns2.some.host
+</code></pre><p>两台解析服务器都使用相同配置</p>
+<ul>
+<li>分别在两台主机验证</li>
+</ul>
+<pre><code># ping ns1.some.host
+# ping ns2.some.host
+</code></pre><h3 id="master-ns1somehost">Master ns1.some.host</h3>
+<pre><code># vim /etc/powerdns/pdns.conf
+
+config-dir=/etc/powerdns
+setuid=pdns
+setgid=pdns
+master=yes
+slave=no
+allow-axfr-ips=x.x.x.x2/32
+default-soa-name=ns1.some.host
+dnsupdate=yes
+daemon=yes
+disable-axfr=no
+guardian=yes
+local-address=0.0.0.0
+local-port=53
+log-dns-details=no
+log-dns-queries=no
+loglevel=9
+socket-dir=/var/run
+version-string=powerdns
+# only 4.0
+webserver=yes
+api=yes
+api-key=somekey
+include-dir=/etc/powerdns/pdns.d
+launch=
+</code></pre><p>其中x.x.x.x2为从服务器ns2.some.host的ip地址</p>
+<h3 id="slave-ns2somehost">Slave ns2.some.host</h3>
+<pre><code># vim /etc/powerdns/pdns.conf
+
+config-dir=/etc/powerdns
+setuid=pdns
+setgid=pdns
+master=no
+slave=yes
+daemon=yes
+disable-axfr=yes
+guardian=yes
+local-address=0.0.0.0
+local-port=53
+log-dns-details=no
+log-dns-queries=no
+loglevel=9
+slave-cycle-interval=60
+socket-dir=/var/run
+version-string=powerdns
+include-dir=/etc/powerdns/pdns.d
+launch=
+</code></pre><h3 id="使用powerdns-admin界面创建域名">使用<a href="https://github.com/ngoduykhanh/PowerDNS-Admin" title="web">powerdns-admin</a>界面创建域名</h3>
+<p>登录到<a href="https://github.com/ngoduykhanh/PowerDNS-Admin" title="web">powerdns-admin</a>的网页， 选择New Domain，进入新建向导的网页, 在 name 里输入域名 some.host, type 设置为 master, SOA-EDIT-API 默认 DEFAULT</p>
+<p>点击Dashboard 回到主界面, 从列表中选择刚才创建的域名 some.host</p>
+<pre><code>some.host	SOA	ns1.some.host hostmaster.some.host 2017101100 28800 7200 604800 86400
+</code></pre><p>第一条ns1.some.host为主服务器域名</p>
+<p>第二条hostmaster.some.host实际上是邮件地址，系统替换第一个'.&lsquo;为&rsquo;@', 这里代表的地址是hostmaster@some.host，具体可以根据实际情况写自己的邮箱地址</p>
+<p>创建成功以后可以用dig命令核实一下</p>
+<pre><code>dig some.host soa @localhost
+;; ANSWER SECTION:
+some.host.              3600    IN      SOA     ns1.some.host. postmaster.some.host. 2017101106 28800 7200 604800 86400
+</code></pre><h3 id="创建dnssec记录">创建DNSSEC记录</h3>
+<ul>
+<li>使用pdnsutil创建DNSSEC</li>
+</ul>
+<pre><code>pdnsutil secure-zone some.host
+
+Securing zone with default key size
+Adding CSK (257) with algorithm ecdsa256
+Zone some.host secured
+gpgsql Connection successful. Connected to database 'pdns' on 'localhost'.
+Adding NSEC ordering information
+</code></pre><ul>
+<li>查看已经生成的key</li>
+</ul>
+<pre><code>pdnsutil show-zone some.host
+
+This is a Master zone
+Last SOA serial number we notified: 2017101100 == 2017101100 (serial in the database)
+Metadata items: None
+Zone has NSEC semantics
+keys:
+ID = 10 (CSK), flags = 257, tag = 59581, algo = 13, bits = 256    Active ( ECDSAP256SHA256 )
+CSK DNSKEY = some.host. IN DNSKEY 257 3 13 PQ29wza3majnpUQ+21oEkQjfpyN3dMnTy0StcnNX7YeuRRkOeddqPpFMDoeovZcpQGV0BxduvFn/Q2DW5WXp8w== ; ( ECDSAP256SHA256 )
+DS = some.host. IN DS 59581 13 1 7908b7585027f7a262d664c7ee07ae5c5733d44e ; ( SHA1 digest )
+DS = some.host. IN DS 59581 13 2 cfc9006e02d2a02448cd8cdde7fcb8e840703883b166685f37db5225ad902a88 ; ( SHA256 digest )
+DS = some.host. IN DS 59581 13 3 67099daf0ecaf3e99c1c5dcce132c66dc201d27d2f1baade0fecbbbaa2c6b423 ; ( GOST R 34.11-94 digest )
+DS = some.host. IN DS 59581 13 4 53062fef193fae2564f9f2441cb821ae3b55c92afac5790ae70cb8e9359313e0a4c879a09c44c9cb98ed68100cf2e938 ; ( SHA-384 digest )
+</code></pre><ul>
+<li>把相关信息推送到从服务器</li>
+</ul>
+<p>在主服务器上执行</p>
+<pre><code># pdnsutil rectify-zone some.host
+</code></pre><h2 id="注册解析服务">注册解析服务</h2>
+<ul>
+<li>注册nameserver的IP地址</li>
+</ul>
+<p>打开域名注册商的网页，我这里以<a href="https://www.namesilo.com" title="namesilo">namesilo</a>为例</p>
+<p>点击domain manager, 再点击已经注册成功的域名(some.host)，进入域名管理界面</p>
+<p>在NameServers部分，点击View/Manage Registered NameServers， 进入注册域名解析服务器页面</p>
+<p>点击 REGISTER NEW NAMESERVER 按钮，分别加入ns1, ns2的IP地址</p>
+<ul>
+<li>注册DNSSEC</li>
+</ul>
+<p>回到之前域名管理的页面， 点击DS Records (DNSSEC):后面的Update连接</p>
+<p>进入注册Key的界面， 相关信息在之前 pdnsutil show-zone some.host 的部分已经列出</p>
+<pre><code>DS = some.host. IN DS 59581 13 1 7908b7585027f7a262d664c7ee07ae5c5733d44e ; ( SHA1 digest )
+</code></pre><p>Digest = 7908b7585027f7a262d664c7ee07ae5c5733d44e</p>
+<p>Key Tag = 59581</p>
+<p>Digest Type = 1</p>
+<p>Algorithm = 13</p>
+<h2 id="检验">检验</h2>
+<ul>
+<li>检查域名是否已在全球生效</li>
+</ul>
+<p>打开网站： <a href="https://dnschecker.org/">https://dnschecker.org/</a></p>
+<p>输入域名 some.host , 检查各地的解析情况</p>
+<ul>
+<li>使用dig在本地服务器检验DNSSEC</li>
+</ul>
+<pre><code># dig some.host +dnssec +multi @localhost
+
+;; AUTHORITY SECTION:
+some.host.              86400 IN SOA ns1.some.host. hostmaster.some.host. (
+                                2017101100 ; serial
+                                28800      ; refresh (8 hours)
+                                7200       ; retry (2 hours)
+                                604800     ; expire (1 week)
+                                86400      ; minimum (1 day)
+                                )
+some.host.              86400 IN RRSIG SOA 13 2 86400 (
+                                20171019000000 20170928000000 59581 some.host.
+                                UyrOyITKMWhtf2n8lN3ZhtxaAGSMFQI9Qndd49D2/Pe5
+                                wWLileK3RVPFRGlXflQfFDfQ6wb7R5+aBCls6qkmIA== )
+some.host.              86400 IN NSEC some.host. SOA RRSIG NSEC DNSKEY
+some.host.              86400 IN RRSIG NSEC 13 2 86400 (
+                                20171019000000 20170928000000 59581 some.host.
+                                4fjlTftqvjmoH0OwVf3uuC8OvvuYyyIckn+c5L0J89Np
+                                kc1+LCZ5DJpQrnbsWypxr5bDXARB86pr046dbrs21A== )
+</code></pre><ul>
+<li>使用在线工具检验 DNSSEC</li>
+</ul>
+<p>打开网页 <a href="https://dnssec-debugger.verisignlabs.com">https://dnssec-debugger.verisignlabs.com</a></p>
+<p>输入域名 some.host</p>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li>[How To Install and Configure PowerDNS with a MariaDB Backend on Ubuntu 14.04] (<a href="https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-powerdns-with-a-mariadb-backend-on-ubuntu-14-04">https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-powerdns-with-a-mariadb-backend-on-ubuntu-14-04</a>)</li>
+<li><a href="https://github.com/ngoduykhanh/PowerDNS-Admin/wiki/Running-PowerDNS-Admin-on-Ubuntu-16.04---Ubuntu-18.04">Running PowerDNS Admin on Ubuntu 16.04 Ubuntu 18.04</a></li>
+<li><a href="https://github.com/ngoduykhanh/PowerDNS-Admin/wiki/Using-PowerDNS-Admin-with-PostgreSQL">Using PowerDNS Admin with PostgreSQL</a></li>
+<li>官方安装文档 <a href="https://doc.powerdns.com/authoritative/installation.html">https://doc.powerdns.com/authoritative/installation.html</a></li>
+</ul>
+<h2 id="vps-推荐">VPS 推荐</h2>
+<ul>
+<li>[10g.biz] (<a href="https://10g.biz/aff.php?aff=226">https://10g.biz/aff.php?aff=226</a>)</li>
+<li>[bandwagonhost 中国优化] (<a href="https://bandwagonhost.com/aff.php?aff=20451">https://bandwagonhost.com/aff.php?aff=20451</a>)</li>
+<li>[cubecloud] (<a href="https://www.cubecloud.net/aff.php?aff=963">https://www.cubecloud.net/aff.php?aff=963</a>)</li>
+</ul>
+</div>
+	</section>
+</article>
+	
+			<div id="remark42"></div>
+	
+
+		</main>
+		<div class="w-full h-0 flex-none order-3"></div>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/post/" title="Posts page" 
+			class="font-medium text-medium-red-violet-600 hover:text-medium-red-violet-400" >
+			Posts
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="Categories page" >
+			Categories
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="Tags page" >
+			Tags
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="About page" >
+			About
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="search" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/windyboy' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:windyboy@gmail.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+	<a href='https://twitter.com/windysylph' target="_blank" class="twitter icon pl-1 text-eucalyptus-400 hover:text-java-400" title="twitter link" rel="noopener"
+		aria-label="follow on twitter——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M15.3 5.55a2.9 2.9 0 0 0-2.9 2.847l-.028 1.575a.6.6 0 0 1-.68.583l-1.561-.212c-2.054-.28-4.022-1.226-5.91-2.799-.598 3.31.57 5.603 3.383 7.372l1.747 1.098a.6.6 0 0 1 .034.993L7.793 18.17c.947.059 1.846.017 2.592-.131 4.718-.942 7.855-4.492 7.855-10.348 0-.478-1.012-2.141-2.94-2.141zm-4.9 2.81a4.9 4.9 0 0 1 8.385-3.355c.711-.005 1.316.175 2.669-.645-.335 1.64-.5 2.352-1.214 3.331 0 7.642-4.697 11.358-9.463 12.309-3.268.652-8.02-.419-9.382-1.841.694-.054 3.514-.357 5.144-1.55C5.16 15.7-.329 12.47 3.278 3.786c1.693 1.977 3.41 3.323 5.15 4.037 1.158.475 1.442.465 1.973.538z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2016–2021
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1910 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/2016/09/tomcat-keystore-using-letsencrypt-certs/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        tomcat 以 keystore 的方式使用 letsencrypt 证书
+    </a>
+    
+    
+    <a class="flex-grow-0" href="/post/2020/07/proxy-with-nghttpx-squid/">
+        nghttpx搭配squid科学浏览（更新debian）
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
+    
+</div>
+<div >
+
+
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+
+<script>
+  var remark_config = {
+    host: "https://remark.windy.me",
+    site_id: "backyard",
+    url: "https://windyboy.github.io/post/2017/10/setup-powerdns-authoritative-with-dnssec/",
+    local: "cn"
+  };
+
+  (function(c) {
+    for(var i = 0; i < c.length; i++){
+      var d = document, s = d.createElement('script');
+      s.src = remark_config.host + '/web/' + c[i] +'.js';
+      s.defer = true;
+      (d.head || d.body).appendChild(s);
+    }
+  })(remark_config.components || ['embed']);
+</script>
+
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>

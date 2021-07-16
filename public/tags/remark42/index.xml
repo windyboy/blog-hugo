@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>remark42 on 后花园</title>
+    <link>https://windyboy.github.io/tags/remark42/</link>
+    <description>Recent content in remark42 on 后花园</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>Copyright © 2016–2021</copyright>
+    <lastBuildDate>Fri, 24 Jul 2020 13:56:31 +0800</lastBuildDate>
+    
+	<atom:link href="https://windyboy.github.io/tags/remark42/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>使用 Remark42 实现自建用户留言</title>
+      <link>https://windyboy.github.io/post/2020/07/setup-remark42/</link>
+      <pubDate>Fri, 24 Jul 2020 13:56:31 +0800</pubDate>
+      
+      <guid>https://windyboy.github.io/post/2020/07/setup-remark42/</guid>
+      <description>&lt;h2 id=&#34;概况&#34;&gt;概况&lt;/h2&gt;
+&lt;p&gt;原来使用hugo自带的disqus插件实现用户留言，默认情况下感觉要读取的东西太多，于是打算找一个替代产品
+最好是自建服务，装载要比disqus快&lt;/p&gt;
+&lt;h2 id=&#34;选择&#34;&gt;选择&lt;/h2&gt;
+&lt;p&gt;根据官方的指引&lt;a href=&#34;https://gohugo.io/content-management/comments/&#34; title=&#34;comments&#34;&gt;comments&lt;/a&gt;，其实可以选择的替代品不少&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;h2 id=&#34;comments-alternatives&#34;&gt;Comments Alternatives&lt;/h2&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;There are a few alternatives to commenting on static sites for those who do not want to use Disqus:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://staticman.net/&#34; title=&#34;Staticman&#34;&gt;Staticman&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.talkyard.io/blog-comments&#34; title=&#34;talkyard&#34;&gt;Talkyard&lt;/a&gt; (Open source, &amp;amp; serverless hosting)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://intensedebate.com/&#34; title=&#34;Intense Debate&#34;&gt;IntenseDebate&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://graphcomment.com/&#34; title=&#34;Graph Comment&#34;&gt;Graph Comment&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://muut.com/&#34; title=&#34;muut&#34;&gt;Muut&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://posativ.org/isso/&#34; title=&#34;isso&#34;&gt;Isso&lt;/a&gt; (Self-hosted, Python)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://utteranc.es/&#34; title=&#34;Utterances&#34;&gt;Utterances&lt;/a&gt; (Open source, GitHub comments widget built on GitHub issues)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/umputun/remark42&#34; title=&#34;remark42&#34;&gt;Remark42&lt;/a&gt; (Open source, Golang, Easy to run docker)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://commento.io/&#34; title=&#34;commento&#34;&gt;Commento&lt;/a&gt; (Open Source, available as a service, local install, or docker image)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://talk.hyvor.com/&#34; title=&#34;Hyvor Talk&#34;&gt;Hyvor Talk&lt;/a&gt; (Available as a service)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;有使用github isses作为载体的，但看到网上有人反映数量会爆&lt;/p&gt;
+&lt;p&gt;Isso 倒也是自服的，但python写的，对比&lt;a href=&#34;https://github.com/umputun/remark42&#34; title=&#34;remark42&#34;&gt;remark42&lt;/a&gt;还是会大一些，安装也会麻烦&lt;/p&gt;
+&lt;p&gt;这里选择的&lt;a href=&#34;https://github.com/umputun/remark42&#34; title=&#34;remark42&#34;&gt;remark42&lt;/a&gt;，考虑到本身是&lt;a href=&#34;https://golang.org/&#34; title=&#34;golang&#34;&gt;golang&lt;/a&gt;编写，这样会有比较小的体积以及较好的性能&lt;/p&gt;
+&lt;h2 id=&#34;安装&#34;&gt;安装&lt;/h2&gt;
+&lt;p&gt;官方的安装指引有使用&lt;a href=&#34;https://www.docker.com/&#34; title=&#34;docker&#34;&gt;docker&lt;/a&gt;和二进制安装两种方案&lt;/p&gt;
+&lt;p&gt;因为我的服务器资源有限，其实docker都是挺重的负担，这里选择直接安装二进制文件，编写服务脚本&lt;/p&gt;
+&lt;p&gt;从release的页面 &lt;a href=&#34;https://github.com/umputun/remark42/releases&#34;&gt;https://github.com/umputun/remark42/releases&lt;/a&gt; 选择一个稳定的版本，一般就是linux 64位的版本
+&lt;a href=&#34;https://github.com/umputun/remark42/releases/download/v1.6.0/remark42.linux-amd64.tar.gz&#34;&gt;https://github.com/umputun/remark42/releases/download/v1.6.0/remark42.linux-amd64.tar.gz&lt;/a&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;   $ wget https://github.com/umputun/remark42/releases/download/v1.6.0/remark42.linux-amd64.tar.gz
+   $ tar xzvf  remark42.linux-amd64.tar.gz
+   $ sudo cp remark42.linux-amd64 /usr/local/bin/remark42  
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;因为是&lt;a href=&#34;https://golang.org/&#34; title=&#34;golang&#34;&gt;golang&lt;/a&gt;的程序，下载包只有不到8M的体积，而且没有其他依赖，在微型服务器上安装非常舒服&lt;/p&gt;
+&lt;h2 id=&#34;配置&#34;&gt;配置&lt;/h2&gt;
+&lt;h3 id=&#34;创建用户资源&#34;&gt;创建用户/资源&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo useradd -r remark42
+$ sudo mkdir -m 770 /var/www/remark42
+$ sudo chown :remark42 /var/www/remark42
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;运行参数环境变量&#34;&gt;运行参数（环境变量）&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo mkdir /etc/remark42
+$ sudo vim /etc/remark42/remark42.conf
+REMARK_URL=https://myblog.address
+SECRET=some_secret_key_phrase_1234
+SITE=myblog
+AUTH_ANON=true
+EMOJI=true
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;systemd-服务脚本&#34;&gt;systemd 服务脚本&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo vim /etc/systemd/system/remark42.service
+[Unit]
+Description=remark42 comment engine
+After=network.target
+
+[Service]
+User=remark42
+Group=remark42
+EnvironmentFile=/etc/remark42/remark42.conf
+WorkingDirectory=/var/www/remark42
+Restart=always
+RestartSec=5
+ExecStart=/usr/local/bin/remark42 server
+
+[Install]
+WantedBy=multi-user.target
+
+$ sudo systemctl daemon-reload
+$ sudo systemctl start remark42
+$ sudo systemctl enable remark42
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;配置反向代理nginx&#34;&gt;配置反向代理(nginx)&lt;/h3&gt;
+&lt;p&gt;最好设置一个独立的子域名，比如 remark.my.blog&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo cat /etc/nginx/sites-available/remark42 
+server {
+    server_name remark.windy.me;
+    listen 443;
+    ssl_certificate /etc/letsencrypt/live/remark.my.blog/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/remark.my.blog/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+    location / {
+         proxy_redirect          off;
+         proxy_set_header        X-Real-IP $remote_addr;
+         proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+         proxy_set_header        Host $http_host;
+         proxy_pass              http://127.0.0.1:8080/;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/umputun/remark42&#34; title=&#34;remark42&#34;&gt;remark42&lt;/a&gt;服务启动后，在本地监听8080端口，把nginx代理到服务上&lt;/p&gt;
+&lt;h3 id=&#34;oauth用户认证服务&#34;&gt;OAuth用户认证服务&lt;/h3&gt;
+&lt;h4 id=&#34;google&#34;&gt;Google&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;打开 &lt;a href=&#34;https://console.developers.google.com/cloud-resource-manager&#34;&gt;https://console.developers.google.com/cloud-resource-manager&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;创建应用 remark&lt;/li&gt;
+&lt;li&gt;点击左上角下拉菜单，选择 APIs &amp;amp; Services ， 再点击 Credentials&lt;/li&gt;
+&lt;li&gt;在 Authorized JavaScript origins -&amp;gt; URIs 中添加blog的地址和remark服务的地址&lt;/li&gt;
+&lt;li&gt;Authorized redirect URIs -&amp;gt; URIs 中填写回掉地址 &lt;a href=&#34;https://remark.my.blog/auth/google/callback&#34;&gt;https://remark.my.blog/auth/google/callback&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;根据页面信息填写配置文件 remark42.conf 中相应的配置信息AUTH_GOOGLE_CID，AUTH_GOOGLE_CSEC&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;github&#34;&gt;Github&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;打开开发者页面 &lt;a href=&#34;https://github.com/settings/developers&#34;&gt;https://github.com/settings/developers&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;填写 Homepage URL &amp;ldquo;&lt;a href=&#34;https://remark.my.blog&#34;&gt;https://remark.my.blog&lt;/a&gt;&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;填写 Authorization callback URL &amp;ldquo;&lt;a href=&#34;https://remark.my.blog/auth/github/callback%22&#34;&gt;https://remark.my.blog/auth/github/callback&amp;quot;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;根据页面 Client ID, Client Secret 更新配置文件 remark42.conf:  AUTH_GITHUB_CID， AUTH_GITHUB_CSEC&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;twitter&#34;&gt;Twitter&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;打开 &lt;a href=&#34;https://developer.twitter.com/en/apps&#34;&gt;https://developer.twitter.com/en/apps&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;创建 App&lt;/li&gt;
+&lt;li&gt;填写 Website URL &amp;ldquo;&lt;a href=&#34;https://remark.my.blog&#34;&gt;https://remark.my.blog&lt;/a&gt;&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;填写 Callback URL &amp;ldquo;&lt;a href=&#34;https://remark.my.blog/auth/twitter/callback%22&#34;&gt;https://remark.my.blog/auth/twitter/callback&amp;quot;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;点击 Keys and tokens 的tab, 查看 Consumer API keys： API key，API secret key&lt;/li&gt;
+&lt;li&gt;更新配置文件 remark42.conf， 填写 AUTH_TWITTER_CID ，AUTH_TWITTER_CSEC&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;配置hugo的评论模版&#34;&gt;配置hugo的评论模版&lt;/h3&gt;
+&lt;p&gt;打开主题中的模版文件 layouts/partials/comments.html
+添加remark42配置&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{{- if  .Site.Params.remark42SiteID  }}
+&amp;lt;script&amp;gt;
+	var remark_config = {
+		host: {{ .Site.Params.remark42Url }},
+        site_id: {{ .Site.Params.remark42SiteID }},
+        components: [&#39;embed&#39;],
+		url: {{ .Permalink }},
+        locale: {{ .Site.Language.Lang }},
+        max_shown_comments: 10,
+        theme: &#39;dark&#39;,
+	  };
+	  (function(c) {
+		for(var i = 0; i &amp;lt; c.length; i++){
+		  var d = document, s = d.createElement(&#39;script&#39;);
+		  s.src = remark_config.host + &#39;/web/&#39; +c[i] +&#39;.js&#39;;
+		  s.defer = true;
+		  (d.head || d.body).appendChild(s);
+		}
+	  })(remark_config.components || [&#39;embed&#39;]);
+   &amp;lt;/script&amp;gt;
+&amp;lt;div id=&amp;quot;remark42&amp;quot; &amp;gt;&amp;lt;/div&amp;gt;
+{{- end }}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;修改hugo配置文件config.toml&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[params]
+  remark42SiteID = &amp;quot;myblog&amp;quot;
+  remark42Url = &amp;quot;https://remark.my.blog&amp;quot;
+  comments = true
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;配置评论管理员&#34;&gt;配置评论管理员&lt;/h3&gt;
+&lt;p&gt;在评论框在底部成功出现以后，使用Oauth服务登陆评论系统，登陆成功以后可以点击评论的nickname，可以看到当前用户编号
+设置用户编号为评论管理员，可以设置多个管理员，用逗号分割&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo vim /etc/remark42/remark42.conf
+ADMIN_SHARED_ID=github_20924f5ace2e27ff9b98801b837b8a495308d782
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;配置-telegram-的通知&#34;&gt;配置 telegram 的通知&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;打开 Telegram 应用&lt;/li&gt;
+&lt;li&gt;查询联系人 BotFather&lt;/li&gt;
+&lt;li&gt;和 BotFather 对话，输入 /newbot 创建机器人&lt;/li&gt;
+&lt;li&gt;根据提示信息，还需要创建一个结尾是 _bot的机器人&lt;/li&gt;
+&lt;li&gt;根据 HTTP API的token信息填写 remark42.conf 中 NOTIFY_TELEGRAM_TOKEN&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo vim /etc/remark42/remark42.conf
+NOTIFY_TYPE=telegram
+NOTIFY_TELEGRAM_TOKEN=12345678:xy778Iltzsdr45tg
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;使用Telegram的应用，创建一个私有的Channel， 并把新创建的机器人加为Channel管理员&lt;/li&gt;
+&lt;li&gt;使用 &lt;a href=&#34;https://web.telegram.org/&#34; title=&#34;Telegram 网页&#34;&gt;Telegram 网页&lt;/a&gt; 查询channel的编号
+&lt;ul&gt;
+&lt;li&gt;打开网页以后，点击刚才创建的 channel&lt;/li&gt;
+&lt;li&gt;在地址栏出现 &lt;a href=&#34;https://web.telegram.org/#/im?p=c&#34;&gt;https://web.telegram.org/#/im?p=c&lt;/a&gt;&lt;strong&gt;1055587116&lt;/strong&gt;_11052224402541910257&lt;/li&gt;
+&lt;li&gt;这里 1055587116 为编号，在前面加 &lt;strong&gt;-100&lt;/strong&gt; 成为频道编号 &lt;strong&gt;-1001055587116&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo vim /etc/remark42/remark42.conf
+NOTIFY_TELEGRAM_CHAN=-1001055587116
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;全部配置完后，重启remark42的服务&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo systemctl restart remark42
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;参考资料&#34;&gt;参考资料&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;[hugo comments] &lt;a href=&#34;https://gohugo.io/content-management/comments/&#34;&gt;https://gohugo.io/content-management/comments/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;[remark42 official doc] &lt;a href=&#34;https://github.com/umputun/remark42&#34;&gt;https://github.com/umputun/remark42&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;[hugo comments with remark42] &lt;a href=&#34;https://blog.lasall.dev/post/hugo-and-comments-with-remark42/&#34;&gt;https://blog.lasall.dev/post/hugo-and-comments-with-remark42/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

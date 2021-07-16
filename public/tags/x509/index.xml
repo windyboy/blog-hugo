@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>x509 on 后花园</title>
+    <link>https://windyboy.github.io/tags/x509/</link>
+    <description>Recent content in x509 on 后花园</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>Copyright © 2016–2021</copyright>
+    <lastBuildDate>Fri, 28 Aug 2020 12:39:12 +0800</lastBuildDate>
+    
+	<atom:link href="https://windyboy.github.io/tags/x509/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Drone CI 解决自签名证书的信任问题</title>
+      <link>https://windyboy.github.io/post/2020/08/drone-ci-x509-issue/</link>
+      <pubDate>Fri, 28 Aug 2020 12:39:12 +0800</pubDate>
+      
+      <guid>https://windyboy.github.io/post/2020/08/drone-ci-x509-issue/</guid>
+      <description>&lt;h2 id=&#34;概述&#34;&gt;概述&lt;/h2&gt;
+&lt;p&gt;自建的系统如果没有使用公网资源，多数都是采用自签名的方式发放证书。最大的问题几乎就是自签名的信任问题，几乎成了自建工作环境最大的痛。大家都以为把主机的证书挂载到runner上就可以解决问题，&lt;strong&gt;然而并不行&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;问题&#34;&gt;问题&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;clone 的过程中，证书不信任&lt;/li&gt;
+&lt;li&gt;push docker 镜像， release 发布证书不信任&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;解决方法&#34;&gt;解决方法&lt;/h2&gt;
+&lt;h3 id=&#34;clone&#34;&gt;clone&lt;/h3&gt;
+&lt;p&gt;如果不是把clone作为一个step，可以直接使用skip_verify: true忽略验证&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;clone:
+  tags: true
+  skip_verify: true
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;当然也可以使用下面挂载主机证书的方法&lt;/p&gt;
+&lt;h3 id=&#34;证书不信任&#34;&gt;证书不信任&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;首先把登陆drone的用户设置成admin
+在drone server启动的环境变量中设置&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;DRONE_USER_CREATE=username:yourgitloginname,admin:true
+&lt;/code&gt;&lt;/pre&gt;&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;把项目设置为信任项目&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src=&#34;https://windyboy.github.io/static/trust.png&#34; alt=&#34;trust project&#34;&gt;&lt;/p&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;把主机的证书目录挂载到执行环境中&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;- name: release-publish
+    image: plugins/docker
+    volumes:
+      - name: certs
+        path: /etc/ssl/certs
+
+volumes:
+  - name: certs
+    host:
+      path: /etc/ssl/certs
+&lt;/code&gt;&lt;/pre&gt;</description>
+    </item>
+    
+    <item>
+      <title>Kind添加私有仓库自签名CA证书</title>
+      <link>https://windyboy.github.io/post/2020/07/kind-add-self-signed-ca/</link>
+      <pubDate>Mon, 20 Jul 2020 10:20:16 +0800</pubDate>
+      
+      <guid>https://windyboy.github.io/post/2020/07/kind-add-self-signed-ca/</guid>
+      <description>&lt;h2 id=&#34;概况&#34;&gt;概况&lt;/h2&gt;
+&lt;p&gt;在开发环境中安装&lt;a href=&#34;%22https://kind.sigs.k8s.io/%22&#34; title=&#34;kind&#34;&gt;kind&lt;/a&gt;以后，如果要部署私有仓库中的镜像，需要把自签名的根证书添加到信任列表中。
+否则需要使用&lt;a href=&#34;%22https://kind.sigs.k8s.io/%22&#34; title=&#34;kind&#34;&gt;kind&lt;/a&gt; load命令手动从主机把镜像加载到容器当中，不能自动部署，略嫌麻烦。&lt;/p&gt;
+&lt;h2 id=&#34;问题&#34;&gt;问题&lt;/h2&gt;
+&lt;p&gt;在部署私有镜像仓库中的镜像的时候发生错误：&amp;ldquo;x509: certificate signed by unknown authority&amp;rdquo;&lt;/p&gt;
+&lt;h2 id=&#34;解决&#34;&gt;解决&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;查看&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;#  get container id
+$ docker ps
+CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                       NAMES
+8c52432697b6        kindest/node:v1.18.2   &amp;quot;/usr/local/bin/entr…&amp;quot;   3 days ago          Up 4 hours          127.0.0.1:39147-&amp;gt;6443/tcp   kind-control-plane
+# attach
+$ docker exec -it 8c52432697b6 /bin/bash
+root@kind-control-plane:/# cat /etc/issue
+Ubuntu 19.10 \n \l
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;发现是ubuntu 19
+于是问题可以解决，要么把主机中含有自签名ca的信任列表Mount到容器中，要么在容器中添加自签名ca证书即可。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;添加ca证书&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;root@kind-control-plane:/# mkdir /usr/local/share/ca-certificates/company
+root@kind-control-plane:/# exit
+
+$ docker cp your-ca.crt 8c52432697b6:/usr/share/etc/ca-certificates/company/
+
+$ docker exec -it 8c52432697b6 /bin/bash
+
+root@kind-control-plane:/# update-ca-certificates
+
+# verify
+root@kind-control-plane:/# curl https://your-private-registry
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;How to install certificates for command line &lt;a href=&#34;https://askubuntu.com/questions/645818/how-to-install-certificates-for-command-line&#34;&gt;https://askubuntu.com/questions/645818/how-to-install-certificates-for-command-line&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
