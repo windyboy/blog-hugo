@@ -1,8 +1,8 @@
 baseURL = "https://windyboy.github.io"
-languageCode = "en-us"
+languageCode = "zh-cn"
 title = "后花园"
 theme="archie"
-copyright = "© Athul"
+copyright = "windyboy © 2016-2021 版权所有"
 pygmentsstyle = "monokai"
 pygmentscodefences = true
 pygmentscodefencesguesssyntax = true
