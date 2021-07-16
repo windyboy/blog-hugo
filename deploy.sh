@@ -12,6 +12,8 @@ hugo # if using a theme, replace with `hugo -t <YOURTHEME>`
 # Go To Public folder
 cd public
 # Add changes to git.
+git config user.name windyboy
+git config user.email windyboy@gmail.com
 git add .
 
 # Commit changes.
