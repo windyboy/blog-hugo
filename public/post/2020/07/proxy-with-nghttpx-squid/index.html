@@ -1,208 +1,85 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html><head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>nghttpx搭配squid科学浏览（更新debian） - 后花园</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="概况 使用通用的https代理访问互联网
+受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网
+  服务器
+服务器上部署代理工具 nghttp2（nghttpx server） ，缓存服务squid 安装letsencrypt证书
+  客户端
+客户端可以不安装特别软件，直接设置proxy就可以，在服务端如果开启客户端认证，需要在客户端安装客户证书
+https proxy client ==&gt; https 服务
+  主要工具
+ https proxy 服务器 nghttp2 certbot 安装letsencrypt证书 缓存服务器 squid 客户端证书生成工具 easyrsa 客户端证书导入导出 openssl    安装 centos 7 #cat /etc/redhat-release CentOS Linux release 7.2.1511 (Core)  基础软件(编译)  如果使用epel的源安装，首先安装epel
+# yum install epel-release # yum install openssl git-core  nghttp2 squid  使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序" />
+	<meta property="og:image" content=""/>
+	<meta property="og:title" content="nghttpx搭配squid科学浏览（更新debian）" />
+<meta property="og:description" content="概况 使用通用的https代理访问互联网
+受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网
+  服务器
+服务器上部署代理工具 nghttp2（nghttpx server） ，缓存服务squid 安装letsencrypt证书
+  客户端
+客户端可以不安装特别软件，直接设置proxy就可以，在服务端如果开启客户端认证，需要在客户端安装客户证书
+https proxy client ==&gt; https 服务
+  主要工具
+ https proxy 服务器 nghttp2 certbot 安装letsencrypt证书 缓存服务器 squid 客户端证书生成工具 easyrsa 客户端证书导入导出 openssl    安装 centos 7 #cat /etc/redhat-release CentOS Linux release 7.2.1511 (Core)  基础软件(编译)  如果使用epel的源安装，首先安装epel
+# yum install epel-release # yum install openssl git-core  nghttp2 squid  使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://windyboy.github.io/post/2020/07/proxy-with-nghttpx-squid/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2020-07-17T15:13:14+08:00" />
+<meta property="article:modified_time" content="2020-07-17T15:13:14+08:00" />
 
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	
-	<title>后花园  | nghttpx搭配squid科学浏览（更新debian）</title>
-	<meta name="viewport" content="width=device-width,minimum-scale=1">
-	<meta name="generator" content="Hugo 0.84.4" />
-	
-	
-	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
-	
-
-	
-	
-	<link href="/dist/app.css" rel="stylesheet">
-	
-
-	
-
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="nghttpx搭配squid科学浏览（更新debian）"/>
+<meta name="twitter:description" content="概况 使用通用的https代理访问互联网
+受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网
+  服务器
+服务器上部署代理工具 nghttp2（nghttpx server） ，缓存服务squid 安装letsencrypt证书
+  客户端
+客户端可以不安装特别软件，直接设置proxy就可以，在服务端如果开启客户端认证，需要在客户端安装客户证书
+https proxy client ==&gt; https 服务
+  主要工具
+ https proxy 服务器 nghttp2 certbot 安装letsencrypt证书 缓存服务器 squid 客户端证书生成工具 easyrsa 客户端证书导入导出 openssl    安装 centos 7 #cat /etc/redhat-release CentOS Linux release 7.2.1511 (Core)  基础软件(编译)  如果使用epel的源安装，首先安装epel
+# yum install epel-release # yum install openssl git-core  nghttp2 squid  使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序"/>
+<script src="https://windyboy.github.iojs/feather.min.js"></script>
 	
 	
-<link rel="shortcut icon" href="img/favicon-32x32.png" type="image/png" />
-
+        <link href="https://windyboy.github.io/css/fonts.b685ac6f654695232de7b82a9143a46f9e049c8e3af3a21d9737b01f4be211d1.css" rel="stylesheet">
 	
-
-	
-	
-	
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-78513355-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
-	
-	
-	
-
-
-
-<link rel="stylesheet" href='https://windyboy.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
-
-
-<script defer src='https://windyboy.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
-
-
-<script defer src='https://windyboy.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
-crossorigin="anonymous"
-onload='renderMathInElement(document.body);'></script>
-
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        renderMathInElement(document.body, {
-            delimiters: [
-                {left: "$$", right: "$$", display: true},
-                {left: "$", right: "$", display: false}
-            ]
-        });
-    });
-</script>
 
 	
+	<link rel="stylesheet" type="text/css" media="screen" href="https://windyboy.github.io/css/main.2f9b5946627215dc1ae7fa5f82bfc9cfcab000329136befeea5733f21e77d68f.css" />
+		<link rel="stylesheet" type="text/css" href="https://windyboy.github.io/css/dark.726cd11ca6eb7c4f7d48eb420354f814e5c1b94281aaf8fd0511c1319f7f78a4.css" media="(prefers-color-scheme: dark)" />
 	
-	
-	<script>
-		(function (u, c) {
-			var d = document,
-				t = 'script',
-				o = d.createElement(t),
-				s = d.getElementsByTagName(t)[0];
-			o.src = u;
-			if (c) {
-				o.addEventListener('load', function (e) {
-					c(e);
-				});
-			}
-			s.parentNode.insertBefore(o, s);
-		})('https:\/\/windyboy.github.io\/lib\/pangu.min.js', function () {
-			pangu.spacingPage();
-		});
-	</script>
-	
-	
-	<style type="text/css" media="screen, print">
-		@font-face {
-			font-family: "FancyTitleFont";
-			font-style: normal;
-			font-display: swap;
-			src: url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
-				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
-		}
-
-		 
-		@font-face {
-			font-family: 'Noto Serif CJK SC';
-			font-style: normal;
-			font-weight: 300;
-			font-display: swap;
-			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
-				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
-				 
-				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
-			 
-		}
-
-		 
-		@font-face {
-			font-family: 'Noto Serif CJK SC';
-			font-style: normal;
-			font-weight: 400;
-			font-display: swap;
-			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
-				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
-				 
-				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
-			 
-		}
-
-		 
-		@font-face {
-			font-family: 'Noto Serif CJK SC';
-			font-style: normal;
-			font-weight: 500;
-			font-display: swap;
-			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
-				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
-				 
-				url('https://windyboy.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
-			 
-		}
-	</style>
 	
 	
 </head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="https://windyboy.github.io">后花园</a>
+	</div>
+	<nav>
+		
+		<a href="/post/">Posts</a>
+		
+		<a href="/categories/">Categories</a>
+		
+		<a href="/tags">Tags</a>
+		
+	</nav>
+</header>
 
-<body class="bg-gray-100 text-gray-700 font-sans">
-	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
-		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
-			<div
-				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
-				
-<div>
-	<h2>
-		<a href="https://windyboy.github.io/" title="后花园" class="heading font-cursive icon">后花园</a>
-	</h2>
-</div>
-<h1 class="pt-2">nghttpx搭配squid科学浏览（更新debian）</h1>
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">nghttpx搭配squid科学浏览（更新debian）</h1>
+			<div class="meta">Posted on Jul 17, 2020</div>
+		</div>
+		
 
-<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
-	
-	
-	
-	
-	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
-		href='/categories/%E6%8A%80%E6%9C%AF'>技术</a>
-	
-	
-	
-
-	
-	&nbsp;&nbsp;
-	
-
-	
-	
-	
-	
-	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/nghttpx'>nghttpx</a>&nbsp;&#47;
-	
-	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/squid'>squid</a>&nbsp;&#47;
-	
-	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/proxy'>proxy</a>&nbsp;&#47;
-	
-	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/http2'>http2</a>
-	
-	
-	
-</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
-		datetime="2020-07-17T15:13:14&#43;08:00">2020-7-17</time>
-</div>
-
-<hr />
-
-
-			</div>
-		</header>
-		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
-			
-
-<article>
-	<section class="mx-auto content">
-		<div class="c-rich-text"><h2 id="概况">概况</h2>
+		<section class="body">
+			<h2 id="概况">概况</h2>
 <p>使用通用的https代理访问互联网</p>
 <p>受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网</p>
 <ul>
@@ -229,22 +106,22 @@ onload='renderMathInElement(document.body);'></script>
 </ul>
 <h2 id="安装">安装</h2>
 <h3 id="centos-7">centos 7</h3>
-<pre><code>#cat /etc/redhat-release 
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#cat /etc/redhat-release 
 CentOS Linux release 7.2.1511 (Core)
-</code></pre><ul>
+</code></pre></div><ul>
 <li>基础软件(编译)</li>
 </ul>
 <p>如果使用epel的源安装，首先安装epel</p>
-<pre><code># yum install epel-release
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># yum install epel-release
 # yum install openssl git-core
-</code></pre><ul>
+</code></pre></div><ul>
 <li><a href="https://nghttp2.org" title="nghttp2">nghttp2</a> <a href="http://www.squid-cache.org" title="squid">squid</a></li>
 </ul>
 <p>使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序</p>
-<pre><code># yum install nghttp2 squid
-</code></pre><p>nghttp2 也可以自编译源码来安装，epel安装的版本是1.7,通过编译可以安装1.9</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># yum install nghttp2 squid
+</code></pre></div><p>nghttp2 也可以自编译源码来安装，epel安装的版本是1.7,通过编译可以安装1.9</p>
 <blockquote>
-<pre><code>sudo yum groupinstall &quot;Development Tools&quot;
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">sudo yum groupinstall &#34;Development Tools&#34;
 sudo yum install libev libev-devel zlib zlib-devel openssl openssl-devel git
 git clone https://github.com/nghttp2/nghttp2.git
 cd nghttp2
@@ -254,33 +131,33 @@ autoconf
 ./configure
 make
 sudo make install
-</code></pre></blockquote>
+</code></pre></div></blockquote>
 <p>默认安装位置是 <code>/usr/local/bin</code></p>
 <p><em><strong>在centos 7的环境正不能使用最新版的1.11.0-DEV，需要使用1.9.x的版本。在clone项目以后需要checkout 1.9.x的版本</strong></em></p>
 <p><code>git checkout v1.9.x</code></p>
 <p>然后再执行编译的操作,编译安装完成以后，检查一下版本</p>
 <p><code># /usr/local/bin/nghttpx -v</code></p>
 <h3 id="debian-10-ubuntu">debian 10 （ubuntu）</h3>
-<pre><code># lsb_release -a
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># lsb_release -a
 No LSB modules are available.
 Distributor ID: Debian
 Description:    Debian GNU/Linux 10 (buster)
 Release:        10
 Codename:       buster
-</code></pre><pre><code>sudo apt install nghttp2
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">sudo apt install nghttp2
 
 sudo apt install python-certbot-apache -t buster-backports
-</code></pre><p>安装<a href="https://certbot.eff.org" title="certbot">certbot</a>会附带安装一个apache的服务器，需要注意，如果有web的服务，需要禁止掉，申请证书的时候可以临时启动一个
+</code></pre></div><p>安装<a href="https://certbot.eff.org" title="certbot">certbot</a>会附带安装一个apache的服务器，需要注意，如果有web的服务，需要禁止掉，申请证书的时候可以临时启动一个
 编译（略）</p>
 <ul>
 <li><a href="https://github.com/OpenVPN/easy-rsa" title="easyrsa">easyrsa</a></li>
 </ul>
 <p>克隆easyrsa源码</p>
-<pre><code># git clone https://github.com/OpenVPN/easy-rsa.git
-</code></pre><p>把easyrsa 复制到/opt/中完成安装</p>
-<pre><code># cd easy-rsa/
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># git clone https://github.com/OpenVPN/easy-rsa.git
+</code></pre></div><p>把easyrsa 复制到/opt/中完成安装</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># cd easy-rsa/
 # cp -r easyrsa3 /opt/
-</code></pre><h2 id="配置">配置</h2>
+</code></pre></div><h2 id="配置">配置</h2>
 <h3 id="证书">证书</h3>
 <ul>
 <li>https 证书</li>
@@ -288,49 +165,49 @@ sudo apt install python-certbot-apache -t buster-backports
 <p>服务器端证书可以使用<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>提供的免费证书。</p>
 <p><del>配置<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>证书的时候可以使用<a href="https://github.com/lukas2511/letsencrypt.sh">letsencrypt.sh</a>的脚本,可以简化配置的过程。</del></p>
 <p>使用<a href="https://certbot.eff.org" title="certbot">certbot</a>配置</p>
-<pre><code>sudo certbot certonly -d your.domain
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">sudo certbot certonly -d your.domain
 How would you like to authenticate with the ACME CA?
 1: Apache Web Server plugin (apache) 
 2: Nginx Web Server plugin (nginx)
 3: Spin up a temporary webserver (standalone) 
 4: Place files in webroot directory (webroot)
-</code></pre><p>申请证书的时候需要在80端口开启一个web服务，如果使用之前安装的apache可以选1，同样也可以选择nginx，如果没有web服务，也可以选3，临时启动一个服务</p>
+</code></pre></div><p>申请证书的时候需要在80端口开启一个web服务，如果使用之前安装的apache可以选1，同样也可以选择nginx，如果没有web服务，也可以选3，临时启动一个服务</p>
 <ul>
 <li>客户端验证证书</li>
 </ul>
 <p>自己做一个ca，自行签发客户端证书，使用easyrsa 配置客户端证书</p>
-<pre><code># cd /opt/easyrsa3
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># cd /opt/easyrsa3
 # mv vars.example vars
-</code></pre><p>编辑vars文件，去掉前面的注释，编辑中主要的变量</p>
-<pre><code>set_var EASYRSA_REQ_COUNTRY    &quot;US&quot;
-set_var EASYRSA_REQ_PROVINCE   &quot;California&quot;
-set_var EASYRSA_REQ_CITY       &quot;San Francisco&quot;
-set_var EASYRSA_REQ_ORG        &quot;Copyleft Certificate Co&quot;
-set_var EASYRSA_REQ_EMAIL      &quot;me@example.net&quot;
-set_var EASYRSA_REQ_OU         &quot;My Organizational Unit&quot;
-</code></pre><p>生成客户端证书</p>
-<pre><code># ./easyrsa init-pki
+</code></pre></div><p>编辑vars文件，去掉前面的注释，编辑中主要的变量</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">set_var EASYRSA_REQ_COUNTRY    &#34;US&#34;
+set_var EASYRSA_REQ_PROVINCE   &#34;California&#34;
+set_var EASYRSA_REQ_CITY       &#34;San Francisco&#34;
+set_var EASYRSA_REQ_ORG        &#34;Copyleft Certificate Co&#34;
+set_var EASYRSA_REQ_EMAIL      &#34;me@example.net&#34;
+set_var EASYRSA_REQ_OU         &#34;My Organizational Unit&#34;
+</code></pre></div><p>生成客户端证书</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># ./easyrsa init-pki
 # ./easyrsa build-ca nopass
 # ./easyrsa gen-dh
 # ./easyrsa build-client-full client-me nopass
-</code></pre><p>导出CA证书</p>
-<pre><code># openssl x509 -in pki/ca.crt -out ca.pem -outform PEM
-</code></pre><p>导出客户端证书</p>
-<pre><code># openssl pkcs12 -export -clcerts -in pki/issued/client-me.crt -inkey pki/private/client-me.key -out client-me.p12
+</code></pre></div><p>导出CA证书</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># openssl x509 -in pki/ca.crt -out ca.pem -outform PEM
+</code></pre></div><p>导出客户端证书</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># openssl pkcs12 -export -clcerts -in pki/issued/client-me.crt -inkey pki/private/client-me.key -out client-me.p12
 # openssl pkcs12 -in client-me.p12 -out client-me.pem -clcerts
-</code></pre><p>客户端电脑导入ca和客户端证书</p>
+</code></pre></div><p>客户端电脑导入ca和客户端证书</p>
 <p>最终生成ca.pem, client-me.pem两个证书文件，复制到客户端，并导入。
 ca.pem导入为可信任的证书颁发机构，client-me.pem导入为信任证书。</p>
 <h3 id="代理">代理</h3>
 <ul>
 <li>创建nghttpx的配置文件</li>
 </ul>
-<pre><code>$ sudo mkdir /etc/nghttpx
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ sudo mkdir /etc/nghttpx
 $ sudo touch /etc/nghttpx/nghttpx.conf
-</code></pre><ul>
+</code></pre></div><ul>
 <li>编辑配置文件 nghttpx.conf</li>
 </ul>
-<pre><code>frontend=0.0.0.0,443;tls
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">frontend=0.0.0.0,443;tls
 backend=127.0.0.1,3128;no-tls
 #服务器证书
 private-key-file=/etc/letsencrypt/live/[domain]/privkey.pem
@@ -345,13 +222,13 @@ no-ocsp=yes
 no-host-rewrite=yes
 add-x-forwarded-for=yes
 strip-incoming-x-forwarded-for=yes
-</code></pre><p>其中[domain]为服务器的域名，privkey.pem, fullchain.pem是letsencrypt生成的服务器证书。dh.pem, ca.pem是客户端证书</p>
+</code></pre></div><p>其中[domain]为服务器的域名，privkey.pem, fullchain.pem是letsencrypt生成的服务器证书。dh.pem, ca.pem是客户端证书</p>
 <ul>
 <li>ngttpx服务</li>
 </ul>
-<pre><code>$ sudo vi /etc/systemd/system/nghttpx.service
-</code></pre><p>编辑内容</p>
-<pre><code>[Unit] 
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ sudo vi /etc/systemd/system/nghttpx.service
+</code></pre></div><p>编辑内容</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">[Unit] 
 Description=nghttpx 
 After=network.target 
 	
@@ -363,25 +240,25 @@ ExecStop=/bin/kill -SIGQUIT ${MAINPID}
 	
 [Install] 
 WantedBy=multi-user.target
-</code></pre><p>服务</p>
-<pre><code>$ sudo systemctl daemon-reload
+</code></pre></div><p>服务</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ sudo systemctl daemon-reload
 $ sudo systemctl start nghttpx
 $ sudo systemctl enable nghttpx
-</code></pre><h3 id="缓存">缓存</h3>
+</code></pre></div><h3 id="缓存">缓存</h3>
 <p>通过yum安装的squid服务，默认配置基本上已经满足要求，需要做一点小修改</p>
 <ul>
 <li>编辑配置</li>
 </ul>
-<pre><code>$ sudo vi /etc/squid/squid.conf
-</code></pre><p>在配置文件尾部加上</p>
-<pre><code>via off
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ sudo vi /etc/squid/squid.conf
+</code></pre></div><p>在配置文件尾部加上</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">via off
 forwarded_for delete
 access_log none
-</code></pre><ul>
+</code></pre></div><ul>
 <li>重启服务</li>
 </ul>
-<pre><code>$ sudo systemctl restart squid
-</code></pre><h2 id="参考资料">参考资料</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ sudo systemctl restart squid
+</code></pre></div><h2 id="参考资料">参考资料</h2>
 <ul>
 <li>nghttpx 官方指引 <a href="https://nghttp2.org/documentation/nghttpx-howto.html">https://nghttp2.org/documentation/nghttpx-howto.html</a></li>
 <li>谷歌上另外一篇参考的nghttpx+squid <a href="https://wzyboy.im/post/1052.html">https://wzyboy.im/post/1052.html</a></li>
@@ -397,156 +274,49 @@ access_log none
 <li>[bandwagonhost 中国优化] (<a href="https://bandwagonhost.com/aff.php?aff=20451">https://bandwagonhost.com/aff.php?aff=20451</a>)</li>
 <li>[cubenet] (<a href="https://www.cubecloud.net/aff.php?aff=963">https://www.cubecloud.net/aff.php?aff=963</a>)</li>
 </ul>
-</div>
-	</section>
-</article>
-	
-			<div id="remark42"></div>
-	
 
-		</main>
-		<div class="w-full h-0 flex-none order-3"></div>
-		<aside role="contentinfo"
-			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
-			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
-				
-	<div class="md:max-w-xs  flex flex-col md:items-end">
-	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
-	
-	
-	<li class="px-1 md:px-0">
-		<a href="/post/" title="Posts page" 
-			class="font-medium text-medium-red-violet-600 hover:text-medium-red-violet-400" >
-			Posts
-		</a>
-	</li>
-	
-	<li class="px-1 md:px-0">
-		<a href="/categories/" title="Categories page" >
-			Categories
-		</a>
-	</li>
-	
-	<li class="px-1 md:px-0">
-		<a href="/tags/" title="Tags page" >
-			Tags
-		</a>
-	</li>
-	
-	<li class="px-1 md:px-0">
-		<a href="/about/" title="About page" >
-			About
-		</a>
-	</li>
-	
-	
-	
-	
-	<div id="fastSearch" class="m-0">
-		<input id="searchInput" type="text" size=10 
-			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
-			placeholder-java-500 min-w-0 max-w-xxxs"
-			placeholder="search" />
-		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
-		</ul>
-	</div>
-	
-</ul>
-	
+		</section>
 
-<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
-	
-	<a href='http://github.com/windyboy' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
-		aria-label="follow on github——Opens in a new window">
-		
-		<div class="fill-current h-8 w-8">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <g>
-        <path fill="none" d="M0 0h24v24H0z"/>
-        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
-    </g>
-</svg>
-
-		</div>
-	</a>
-	
-	<a href='mailto:windyboy@gmail.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
-		aria-label="follow on mail——Opens in a new window">
-		
-		<div class="fill-current h-8 w-8">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <g>
-        <path fill="none" d="M0 0h24v24H0z"/>
-        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
-    </g>
-</svg>
-		</div>
-	</a>
-	
-	<a href='https://twitter.com/windysylph' target="_blank" class="twitter icon pl-1 text-eucalyptus-400 hover:text-java-400" title="twitter link" rel="noopener"
-		aria-label="follow on twitter——Opens in a new window">
-		
-		<div class="fill-current h-8 w-8">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <g>
-        <path fill="none" d="M0 0h24v24H0z"/>
-        <path fill-rule="nonzero" d="M15.3 5.55a2.9 2.9 0 0 0-2.9 2.847l-.028 1.575a.6.6 0 0 1-.68.583l-1.561-.212c-2.054-.28-4.022-1.226-5.91-2.799-.598 3.31.57 5.603 3.383 7.372l1.747 1.098a.6.6 0 0 1 .034.993L7.793 18.17c.947.059 1.846.017 2.592-.131 4.718-.942 7.855-4.492 7.855-10.348 0-.478-1.012-2.141-2.94-2.141zm-4.9 2.81a4.9 4.9 0 0 1 8.385-3.355c.711-.005 1.316.175 2.669-.645-.335 1.64-.5 2.352-1.214 3.331 0 7.642-4.697 11.358-9.463 12.309-3.268.652-8.02-.419-9.382-1.841.694-.054 3.514-.357 5.144-1.55C5.16 15.7-.329 12.47 3.278 3.786c1.693 1.977 3.41 3.323 5.15 4.037 1.158.475 1.442.465 1.973.538z"/>
-    </g>
-</svg>
-
-		</div>
-	</a>
-	
-</div>
-	<div class="text-sm text-gray-500 leading-tight a-gray">
-		Copyright © 2016–2021
-		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1478 words in this page.
-	</div>
-</div>
-
-			</div>
-		</aside>
-		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+		<div class="post-tags">
 			
-<hr class="double-line" />
-<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
-    
-    <a class="flex-grow-0" href="/post/2017/10/setup-powerdns-authoritative-with-dnssec/">
-        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
-            height="24">
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
-        使用powerdns搭建自己安全的域名解析服务
-    </a>
-    
-    
-    <a class="flex-grow-0" href="/post/2020/07/kind-add-self-signed-ca/">
-        Kind添加私有仓库自签名CA证书
-        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
-            height="24">
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
-    
-</div>
-<div >
+			
+			<nav class="nav tags">
+				<ul class="tags">
+					
+					<li><a href="/tags/nghttpx">nghttpx</a></li>
+					
+					<li><a href="/tags/squid">squid</a></li>
+					
+					<li><a href="/tags/proxy">proxy</a></li>
+					
+					<li><a href="/tags/http2">http2</a></li>
+					
+				</ul>
+			</nav>
+			
+			
+		</div>
+
+	</article>
+</main>
+
+<div id="remark42"></div>
+
+<footer>
+<hr><a class="soc" href="https://github.com/windyboy" title="GitHub"><i data-feather="github"></i></a>|<a class="soc" href="https://twitter.com/windysylph/" title="Twitter"><i data-feather="twitter"></i></a>|⚡️
+	2021  © Athul |  <a href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+</footer>
 
 
-
-</div>
-<hr />
-<div class="pb-2">
-    
-</div>
-<hr />
-
-
+<script>
+      feather.replace()
+</script>
 <script>
   var remark_config = {
     host: "https://remark.windy.me",
     site_id: "backyard",
     url: "https://windyboy.github.io/post/2020/07/proxy-with-nghttpx-squid/",
-    local: "cn"
+    locale: { .Site.Language.Lang }
   };
 
   (function(c) {
@@ -559,17 +329,6 @@ access_log none
   })(remark_config.components || ['embed']);
 </script>
 
-
-		</footer>
-		
-
-<script src="/dist/app.js"></script>
-
-
-<script src="/lib/fuse.min.js"></script> 
-<script src="/lib/fastsearch.js"></script>
-
-	</div>
-</body>
-
+</div>
+    </body>
 </html>
