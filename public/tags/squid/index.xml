@@ -5,8 +5,8 @@
     <link>https://windyboy.github.io/tags/squid/</link>
     <description>Recent content in squid on 后花园</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <copyright>© Athul</copyright>
+    <language>zh-cn</language>
+    <copyright>windyboy © 2016-2021 版权所有</copyright>
     <lastBuildDate>Fri, 17 Jul 2020 15:13:14 +0800</lastBuildDate><atom:link href="https://windyboy.github.io/tags/squid/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>nghttpx搭配squid科学浏览（更新debian）</title>

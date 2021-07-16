@@ -5,8 +5,8 @@
     <link>https://windyboy.github.io/tags/dnssec/</link>
     <description>Recent content in dnssec on 后花园</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <copyright>© Athul</copyright>
+    <language>zh-cn</language>
+    <copyright>windyboy © 2016-2021 版权所有</copyright>
     <lastBuildDate>Thu, 14 Feb 2019 10:00:00 +0800</lastBuildDate><atom:link href="https://windyboy.github.io/tags/dnssec/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>使用powerdns搭建自己安全的域名解析服务</title>
