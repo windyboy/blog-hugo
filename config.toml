@@ -14,6 +14,7 @@ pygmentscodefencesguesssyntax = true
   postDateFormat = "2006-1-2"
   remark42SiteID = "backyard"
   remark42Url = "https://remark.windy.me"
+  remark42Theme = "dark"
   comments = true
   remark42ShowComments = 10
 
