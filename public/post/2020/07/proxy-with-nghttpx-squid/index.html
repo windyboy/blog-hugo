@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>nghttpx搭配squid科学浏览（更新debian） - 后花园</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+		<meta property="og:title" content="nghttpx搭配squid科学浏览（更新debian）" />
+<meta property="og:description" content="概况 使用通用的https代理访问互联网
+受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网
+  服务器
+服务器上部署代理工具 nghttp2（nghttpx server） ，缓存服务squid 安装letsencrypt证书
+  客户端
+客户端可以不安装特别软件，直接设置proxy就可以，在服务端如果开启客户端认证，需要在客户端安装客户证书
+https proxy client ==&gt; https 服务
+  主要工具
+ https proxy 服务器 nghttp2 certbot 安装letsencrypt证书 缓存服务器 squid 客户端证书生成工具 easyrsa 客户端证书导入导出 openssl    安装 centos 7 #cat /etc/redhat-release CentOS Linux release 7.2.1511 (Core) 基础软件(编译)  如果使用epel的源安装，首先安装epel
+# yum install epel-release# yum install openssl git-core nghttp2 squid  使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://windyboy.github.io/post/2020/07/proxy-with-nghttpx-squid/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2020-07-17T15:13:14+08:00" />
+<meta property="article:modified_time" content="2020-07-17T15:13:14+08:00" />
+
+
+		<meta itemprop="name" content="nghttpx搭配squid科学浏览（更新debian）">
+<meta itemprop="description" content="概况 使用通用的https代理访问互联网
+受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网
+  服务器
+服务器上部署代理工具 nghttp2（nghttpx server） ，缓存服务squid 安装letsencrypt证书
+  客户端
+客户端可以不安装特别软件，直接设置proxy就可以，在服务端如果开启客户端认证，需要在客户端安装客户证书
+https proxy client ==&gt; https 服务
+  主要工具
+ https proxy 服务器 nghttp2 certbot 安装letsencrypt证书 缓存服务器 squid 客户端证书生成工具 easyrsa 客户端证书导入导出 openssl    安装 centos 7 #cat /etc/redhat-release CentOS Linux release 7.2.1511 (Core) 基础软件(编译)  如果使用epel的源安装，首先安装epel
+# yum install epel-release# yum install openssl git-core nghttp2 squid  使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序"><meta itemprop="datePublished" content="2020-07-17T15:13:14+08:00" />
+<meta itemprop="dateModified" content="2020-07-17T15:13:14+08:00" />
+<meta itemprop="wordCount" content="415">
+<meta itemprop="keywords" content="nghttpx,squid,proxy,http2," />
+		<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="nghttpx搭配squid科学浏览（更新debian）"/>
+<meta name="twitter:description" content="概况 使用通用的https代理访问互联网
+受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网
+  服务器
+服务器上部署代理工具 nghttp2（nghttpx server） ，缓存服务squid 安装letsencrypt证书
+  客户端
+客户端可以不安装特别软件，直接设置proxy就可以，在服务端如果开启客户端认证，需要在客户端安装客户证书
+https proxy client ==&gt; https 服务
+  主要工具
+ https proxy 服务器 nghttp2 certbot 安装letsencrypt证书 缓存服务器 squid 客户端证书生成工具 easyrsa 客户端证书导入导出 openssl    安装 centos 7 #cat /etc/redhat-release CentOS Linux release 7.2.1511 (Core) 基础软件(编译)  如果使用epel的源安装，首先安装epel
+# yum install epel-release# yum install openssl git-core nghttp2 squid  使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序"/>
+
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/custom.css">
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-78513355-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="后花园" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/backyard.png">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">后花园</div>
+					<div class="logo__tagline">各种搞怪</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">nghttpx搭配squid科学浏览（更新debian）</h1>
+			<div class="post__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">windyboy</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2020-07-17T15:13:14&#43;08:00">2020-07-17</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%8A%80%E6%9C%AF/" rel="category">技术</a>
+	</span>
+</div></div>
+		</header>
+<div class="post__toc toc">
+	<div class="toc__title">Page content</div>
+	<div class="toc__menu">
+		<nav id="TableOfContents">
+  <ul>
+    <li><a href="#概况">概况</a></li>
+    <li><a href="#安装">安装</a>
+      <ul>
+        <li><a href="#centos-7">centos 7</a></li>
+        <li><a href="#debian-10-ubuntu">debian 10 （ubuntu）</a></li>
+      </ul>
+    </li>
+    <li><a href="#配置">配置</a>
+      <ul>
+        <li><a href="#证书">证书</a></li>
+        <li><a href="#代理">代理</a></li>
+        <li><a href="#缓存">缓存</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考资料">参考资料</a></li>
+    <li><a href="#vps引用">VPS引用</a></li>
+  </ul>
+</nav>
+	</div>
+</div><div class="content post__content clearfix">
+			<h2 id="概况">概况</h2>
+<p>使用通用的https代理访问互联网</p>
+<p>受限制网络 ==&gt; http proxy ==&gt; nghttpx server ==&gt; squid ==&gt; 互联网</p>
+<ul>
+<li>
+<p>服务器</p>
+<p>服务器上部署代理工具 <a href="https://nghttp2.org" title="nghttp2">nghttp2</a>（nghttpx server） ，缓存服务<a href="http://www.squid-cache.org" title="squid">squid</a>
+安装<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>证书</p>
+</li>
+<li>
+<p>客户端</p>
+<p>客户端可以不安装特别软件，直接设置proxy就可以，在服务端如果开启客户端认证，需要在客户端安装客户证书</p>
+<p>https proxy client ==&gt; https 服务</p>
+</li>
+<li>
+<p>主要工具</p>
+<ul>
+<li>https proxy 服务器 <a href="https://nghttp2.org" title="nghttp2">nghttp2</a></li>
+<li>certbot 安装<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>证书</li>
+<li>缓存服务器 <a href="http://www.squid-cache.org" title="squid">squid</a></li>
+<li>客户端证书生成工具 <a href="https://github.com/OpenVPN/easy-rsa" title="easyrsa">easyrsa</a></li>
+<li>客户端证书导入导出 <a href="https://www.openssl.org" title="openssl">openssl</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="安装">安装</h2>
+<h3 id="centos-7">centos 7</h3>
+<pre><code>#cat /etc/redhat-release 
+CentOS Linux release 7.2.1511 (Core)
+</code></pre><ul>
+<li>基础软件(编译)</li>
+</ul>
+<p>如果使用epel的源安装，首先安装epel</p>
+<pre><code># yum install epel-release
+# yum install openssl git-core
+</code></pre><ul>
+<li><a href="https://nghttp2.org" title="nghttp2">nghttp2</a> <a href="http://www.squid-cache.org" title="squid">squid</a></li>
+</ul>
+<p>使用的代理程序是nghttpx, 安装的软件包是nghttp2，nghttp2中包含nghttpx的代理服务程序</p>
+<pre><code># yum install nghttp2 squid
+</code></pre><p>nghttp2 也可以自编译源码来安装，epel安装的版本是1.7,通过编译可以安装1.9</p>
+<blockquote>
+<pre><code>sudo yum groupinstall &quot;Development Tools&quot;
+sudo yum install libev libev-devel zlib zlib-devel openssl openssl-devel git
+git clone https://github.com/nghttp2/nghttp2.git
+cd nghttp2
+autoreconf -i
+automake
+autoconf
+./configure
+make
+sudo make install
+</code></pre></blockquote>
+<p>默认安装位置是 <code>/usr/local/bin</code></p>
+<p><em><strong>在centos 7的环境正不能使用最新版的1.11.0-DEV，需要使用1.9.x的版本。在clone项目以后需要checkout 1.9.x的版本</strong></em></p>
+<p><code>git checkout v1.9.x</code></p>
+<p>然后再执行编译的操作,编译安装完成以后，检查一下版本</p>
+<p><code># /usr/local/bin/nghttpx -v</code></p>
+<h3 id="debian-10-ubuntu">debian 10 （ubuntu）</h3>
+<pre><code># lsb_release -a
+No LSB modules are available.
+Distributor ID: Debian
+Description:    Debian GNU/Linux 10 (buster)
+Release:        10
+Codename:       buster
+</code></pre><pre><code>sudo apt install nghttp2
+
+sudo apt install python-certbot-apache -t buster-backports
+</code></pre><p>安装<a href="https://certbot.eff.org" title="certbot">certbot</a>会附带安装一个apache的服务器，需要注意，如果有web的服务，需要禁止掉，申请证书的时候可以临时启动一个
+编译（略）</p>
+<ul>
+<li><a href="https://github.com/OpenVPN/easy-rsa" title="easyrsa">easyrsa</a></li>
+</ul>
+<p>克隆easyrsa源码</p>
+<pre><code># git clone https://github.com/OpenVPN/easy-rsa.git
+</code></pre><p>把easyrsa 复制到/opt/中完成安装</p>
+<pre><code># cd easy-rsa/
+# cp -r easyrsa3 /opt/
+</code></pre><h2 id="配置">配置</h2>
+<h3 id="证书">证书</h3>
+<ul>
+<li>https 证书</li>
+</ul>
+<p>服务器端证书可以使用<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>提供的免费证书。</p>
+<p><del>配置<a href="https://letsencrypt.org" title="letsencrypt">letsencrypt</a>证书的时候可以使用<a href="https://github.com/lukas2511/letsencrypt.sh">letsencrypt.sh</a>的脚本,可以简化配置的过程。</del></p>
+<p>使用<a href="https://certbot.eff.org" title="certbot">certbot</a>配置</p>
+<pre><code>sudo certbot certonly -d your.domain
+How would you like to authenticate with the ACME CA?
+1: Apache Web Server plugin (apache) 
+2: Nginx Web Server plugin (nginx)
+3: Spin up a temporary webserver (standalone) 
+4: Place files in webroot directory (webroot)
+</code></pre><p>申请证书的时候需要在80端口开启一个web服务，如果使用之前安装的apache可以选1，同样也可以选择nginx，如果没有web服务，也可以选3，临时启动一个服务</p>
+<ul>
+<li>客户端验证证书</li>
+</ul>
+<p>自己做一个ca，自行签发客户端证书，使用easyrsa 配置客户端证书</p>
+<pre><code># cd /opt/easyrsa3
+# mv vars.example vars
+</code></pre><p>编辑vars文件，去掉前面的注释，编辑中主要的变量</p>
+<pre><code>set_var EASYRSA_REQ_COUNTRY    &quot;US&quot;
+set_var EASYRSA_REQ_PROVINCE   &quot;California&quot;
+set_var EASYRSA_REQ_CITY       &quot;San Francisco&quot;
+set_var EASYRSA_REQ_ORG        &quot;Copyleft Certificate Co&quot;
+set_var EASYRSA_REQ_EMAIL      &quot;me@example.net&quot;
+set_var EASYRSA_REQ_OU         &quot;My Organizational Unit&quot;
+</code></pre><p>生成客户端证书</p>
+<pre><code># ./easyrsa init-pki
+# ./easyrsa build-ca nopass
+# ./easyrsa gen-dh
+# ./easyrsa build-client-full client-me nopass
+</code></pre><p>导出CA证书</p>
+<pre><code># openssl x509 -in pki/ca.crt -out ca.pem -outform PEM
+</code></pre><p>导出客户端证书</p>
+<pre><code># openssl pkcs12 -export -clcerts -in pki/issued/client-me.crt -inkey pki/private/client-me.key -out client-me.p12
+# openssl pkcs12 -in client-me.p12 -out client-me.pem -clcerts
+</code></pre><p>客户端电脑导入ca和客户端证书</p>
+<p>最终生成ca.pem, client-me.pem两个证书文件，复制到客户端，并导入。
+ca.pem导入为可信任的证书颁发机构，client-me.pem导入为信任证书。</p>
+<h3 id="代理">代理</h3>
+<ul>
+<li>创建nghttpx的配置文件</li>
+</ul>
+<pre><code>$ sudo mkdir /etc/nghttpx
+$ sudo touch /etc/nghttpx/nghttpx.conf
+</code></pre><ul>
+<li>编辑配置文件 nghttpx.conf</li>
+</ul>
+<pre><code>frontend=0.0.0.0,443;tls
+backend=127.0.0.1,3128;no-tls
+#服务器证书
+private-key-file=/etc/letsencrypt/live/[domain]/privkey.pem
+certificate-file=/etc/letsencrypt/live/[domain]/fullchain.pem
+#客户端验证
+dh-param-file=/etc/nghttpx/dh.pem
+verify-client-cacert=/etc/nghttpx/ca.pem
+#代理
+http2-proxy=yes
+no-via=yes
+no-ocsp=yes
+no-host-rewrite=yes
+add-x-forwarded-for=yes
+strip-incoming-x-forwarded-for=yes
+</code></pre><p>其中[domain]为服务器的域名，privkey.pem, fullchain.pem是letsencrypt生成的服务器证书。dh.pem, ca.pem是客户端证书</p>
+<ul>
+<li>ngttpx服务</li>
+</ul>
+<pre><code>$ sudo vi /etc/systemd/system/nghttpx.service
+</code></pre><p>编辑内容</p>
+<pre><code>[Unit] 
+Description=nghttpx 
+After=network.target 
+	
+[Service] 
+Type=simple 
+ExecStart=/usr/local/bin/nghttpx --conf=/etc/nghttpx/nghttpx.conf
+ExecReload=/bin/kill -SIGUSR1 ${MAINPID}
+ExecStop=/bin/kill -SIGQUIT ${MAINPID}
+	
+[Install] 
+WantedBy=multi-user.target
+</code></pre><p>服务</p>
+<pre><code>$ sudo systemctl daemon-reload
+$ sudo systemctl start nghttpx
+$ sudo systemctl enable nghttpx
+</code></pre><h3 id="缓存">缓存</h3>
+<p>通过yum安装的squid服务，默认配置基本上已经满足要求，需要做一点小修改</p>
+<ul>
+<li>编辑配置</li>
+</ul>
+<pre><code>$ sudo vi /etc/squid/squid.conf
+</code></pre><p>在配置文件尾部加上</p>
+<pre><code>via off
+forwarded_for delete
+access_log none
+</code></pre><ul>
+<li>重启服务</li>
+</ul>
+<pre><code>$ sudo systemctl restart squid
+</code></pre><h2 id="参考资料">参考资料</h2>
+<ul>
+<li>nghttpx 官方指引 <a href="https://nghttp2.org/documentation/nghttpx-howto.html">https://nghttp2.org/documentation/nghttpx-howto.html</a></li>
+<li>谷歌上另外一篇参考的nghttpx+squid <a href="https://wzyboy.im/post/1052.html">https://wzyboy.im/post/1052.html</a></li>
+<li>nghttpx 的配置，证书，服务脚本 <a href="https://blog.apar.jp/linux/2584/">https://blog.apar.jp/linux/2584/</a></li>
+<li>centos 编译 nghttp2 <a href="https://gist.github.com/sonots/2bdf6cd26c23ef44db71">https://gist.github.com/sonots/2bdf6cd26c23ef44db71</a></li>
+<li>certbot on debian 10 <a href="https://www.tecmint.com/setup-free-ssl-certificate-for-apache-on-debian-10/">https://www.tecmint.com/setup-free-ssl-certificate-for-apache-on-debian-10/</a></li>
+<li>免费证书提供 <a href="https://letsencrypt.org/">https://letsencrypt.org/</a></li>
+<li>client 证书生成 <a href="https://gist.github.com/mtigas/952344">https://gist.github.com/mtigas/952344</a></li>
+</ul>
+<h2 id="vps引用">VPS引用</h2>
+<ul>
+<li>[linode 东京] (<a href="https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66">https://www.linode.com/?r=ec0967c3fb5243693ca573d68000d3a63442ac66</a>)</li>
+<li>[bandwagonhost 中国优化] (<a href="https://bandwagonhost.com/aff.php?aff=20451">https://bandwagonhost.com/aff.php?aff=20451</a>)</li>
+<li>[cubenet] (<a href="https://www.cubecloud.net/aff.php?aff=963">https://www.cubecloud.net/aff.php?aff=963</a>)</li>
+</ul>
+
+		</div>
+		<footer class="post__footer">
+			
+<div class="post__tags tags clearfix">
+	<svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/nghttpx/" rel="tag">nghttpx</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/squid/" rel="tag">squid</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/proxy/" rel="tag">proxy</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/http2/" rel="tag">http2</a>
+		</li>
+	</ul>
+</div>
+		</footer>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<figure class="authorbox__avatar">
+		<img alt="windyboy avatar" src="/img/avatar.png" class="avatar" height="90" width="90">
+	</figure>
+	<div class="authorbox__header">
+		<span class="authorbox__name">About windyboy</span>
+	</div>
+	<div class="authorbox__description">
+		lonely coder.
+	</div>
+</div>
+
+<nav class="pager flex">
+	<div class="pager__item pager__item--prev">
+		<a class="pager__link" href="/post/2017/10/setup-powerdns-authoritative-with-dnssec/" rel="prev">
+			<span class="pager__subtitle">«&thinsp;Previous</span>
+			<p class="pager__title">使用powerdns搭建自己安全的域名解析服务</p>
+		</a>
+	</div>
+	<div class="pager__item pager__item--next">
+		<a class="pager__link" href="/post/2020/07/kind-add-self-signed-ca/" rel="next">
+			<span class="pager__subtitle">Next&thinsp;»</span>
+			<p class="pager__title">Kind添加私有仓库自签名CA证书</p>
+		</a>
+	</div>
+</nav>
+
+
+			</div>
+			
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 windyboy © 2016-2021 版权所有.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script src="/js/custom.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async></script>
+</body>
+</html>

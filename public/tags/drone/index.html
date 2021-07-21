@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>drone - 后花园</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+		<meta property="og:title" content="drone" />
+<meta property="og:description" content="资料补全计划" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://windyboy.github.io/tags/drone/" />
+
+
+		<meta itemprop="name" content="drone">
+<meta itemprop="description" content="资料补全计划">
+		<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="drone"/>
+<meta name="twitter:description" content="资料补全计划"/>
+
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/custom.css">
+	<link rel="alternate" type="application/rss+xml" href="/tags/drone/index.xml" title="后花园">
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-78513355-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo logo--mixed">
+		<a class="logo__link" href="/" title="后花园" rel="home">
+			<div class="logo__item logo__imagebox">
+					<img class="logo__img" src="/img/backyard.png">
+				</div><div class="logo__item logo__text">
+					<div class="logo__title">后花园</div>
+					<div class="logo__tagline">各种搞怪</div>
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main list" role="main">
+	<header class="main__header">
+		<h1 class="main__title">drone</h1>
+	</header><article class="list__item post">
+	<header class="list__header">
+		<h2 class="list__title post__title">
+			<a href="/post/2020/08/drone-ci-x509-issue/" rel="bookmark">
+			Drone CI 解决自签名证书的信任问题
+			</a>
+		</h2>
+		<div class="list__meta meta"><div class="meta__item-author meta__item">
+	<svg class="meta__icon icon icon-author" width="16" height="16" viewBox="0 0 12 16"><path d="M6 1c2.2 0 3.5 2 3.5 4.5C9.5 7 8.9 8.2 8 9c2.9.8 4 2.5 4 5v1H0v-1c0-2.5 1.1-4.2 4-5-.9-.8-1.5-2-1.5-3.5C2.5 3 3.8 1 6 1z"/></svg><span class="meta__text">windyboy</span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class="meta__text" datetime="2020-08-28T12:39:12&#43;08:00">2020-08-28</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg><span class="meta__text"><a class="meta__link" href="/categories/%E6%8A%80%E6%9C%AF/" rel="category">技术</a>
+	</span>
+</div></div>
+	</header>
+	<div class="content list__excerpt post__content clearfix">
+		概述 自建的系统如果没有使用公网资源，多数都是采用自签名的方式发放证书。最大的问题几乎就是自签名的信任问题，几乎成了自建工作环境最大的痛。大家都以为把主机的证书挂载到runner上就可以解决问题，然而并不行
+问题  clone 的过程中，证书不信任 push docker 镜像， release 发布证书不信任  解决方法 clone 如果不是把clone作为一个step，可以直接使用skip_verify: true忽略验证
+clone: tags: true skip_verify: true 当然也可以使用下面挂载主机证书的方法
+证书不信任  首先把登陆drone的用户设置成admin 在drone server启动的环境变量中设置  DRONE_USER_CREATE=username:yourgitloginname,admin:true 把项目设置为信任项目  把主机的证书目录挂载到执行环境中  - name: release-publish image: plugins/docker volumes: - name: certs path: /etc/ssl/certs volumes: - name: certs host: path: /etc/ssl/certs 
+	</div>
+</article>
+</main>
+
+
+			</div>
+			
+<aside class="sidebar sidebar--left"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="SEARCH…" value="" name="q" aria-label="SEARCH…">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="https://windyboy.github.io" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">Recent Posts</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/2021/07/write_native_graphql_client_mutation/">使用go的graphql本地客户端mutation</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/2021/06/urfave-cli-read-config-file/">Urfave Cli 从配置文件读取参数</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/2020/08/drone-ci-x509-issue/">Drone CI 解决自签名证书的信任问题</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/2020/07/setup-remark42/">使用 Remark42 实现自建用户留言</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/2020/07/kind-add-self-signed-ca/">Kind添加私有仓库自签名CA证书</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">Categories</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item">
+				<a class="widget__link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">Tags</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/authoritative/" title="authoritative">authoritative</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/ca/" title="ca">ca</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/certificate/" title="certificate">certificate</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/cli/" title="cli">cli</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/cloudxns/" title="cloudxns">cloudxns</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/comments/" title="comments">comments</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/config/" title="config">config</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/devops/" title="devops">devops</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/disqus/" title="disqus">disqus</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/dns/" title="dns">dns</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/dnssec/" title="dnssec">dnssec</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker/" title="docker">docker</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/drone/" title="drone">drone</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang/" title="golang">golang</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/graphql/" title="graphql">graphql</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hasura/" title="hasura">hasura</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/http2/" title="http2">http2</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo/" title="hugo">hugo</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/k8s/" title="k8s">k8s</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/keystore/" title="keystore">keystore</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kind/" title="kind">kind</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes/" title="kubernetes">kubernetes</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/letsencrypt/" title="letsencrypt">letsencrypt</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/master/" title="master">master</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/nghttpx/" title="nghttpx">nghttpx</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql/" title="postgresql">postgresql</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/powerdns/" title="powerdns">powerdns</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/powerdns-admin/" title="powerdns-admin">powerdns-admin</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/proxy/" title="proxy">proxy</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/registry/" title="registry">registry</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/remark42/" title="remark42">remark42</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/selfsigned/" title="selfsigned">selfsigned</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/slave/" title="slave">slave</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/squid/" title="squid">squid</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/ssl/" title="ssl">ssl</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tomcat/" title="tomcat">tomcat</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/urfave-cli/" title="urfave-cli">urfave-cli</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/x509/" title="x509">x509</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">Social</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Twitter" rel="noopener noreferrer" href="https://twitter.com/windysylph" target="_blank">
+				<svg class="widget-social__link-icon icon icon-twitter" width="24" height="24" viewBox="0 0 384 312"><path d="m384 36.9c-14.1 6.3-29.3 10.5-45.2 12.4 16.3-9.7 28.8-25.2 34.6-43.6-15.2 9-32.1 15.6-50 19.1-14.4-15.2-34.9-24.8-57.5-24.8-43.5 0-78.8 35.3-78.8 78.8 0 6.2.7 12.2 2 17.9-65.5-3.3-123.5-34.6-162.4-82.3-6.7 11.6-10.6 25.2-10.6 39.6 0 27.3 13.9 51.4 35 65.6-12.9-.4-25.1-4-35.7-9.9v1c0 38.2 27.2 70 63.2 77.2-6.6 1.8-13.6 2.8-20.8 2.8-5.1 0-10-.5-14.8-1.4 10 31.3 39.1 54.1 73.6 54.7-27 21.1-60.9 33.7-97.8 33.7-6.4 0-12.6-.4-18.8-1.1 34.9 22.4 76.3 35.4 120.8 35.4 144.9 0 224.1-120 224.1-224.1 0-3.4-.1-6.8-.2-10.2 15.4-11.1 28.7-25 39.3-40.8z"/></svg>
+				<span>Twitter</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/windyboy" target="_blank">
+				<svg class="widget-social__link-icon icon icon-github" width="24" height="24" viewBox="0 0 384 374"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:windyboy@gmail.com">
+				<svg class="widget-social__link-icon icon icon-mail" width="24" height="24" viewBox="0 0 416 288"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>windyboy@gmail.com</span>
+			</a>
+		</div>
+
+		
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 windyboy © 2016-2021 版权所有.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script src="/js/custom.js"></script></body>
+</html>
