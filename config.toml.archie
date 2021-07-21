@@ -1,0 +1,44 @@
+baseURL = "https://windyboy.github.io"
+languageCode = "zh-cn"
+title = "后花园"
+theme="archie"
+copyright = "windyboy © 2016-2021 版权所有"
+pygmentsstyle = "monokai"
+pygmentscodefences = true
+pygmentscodefencesguesssyntax = true
+[params]
+	mode="auto"
+	useCDN=false
+	subtitle = "各种花花草草"
+  useChineseFonts = true 
+  postDateFormat = "2006-1-2"
+  remark42SiteID = "backyard"
+  remark42Url = "https://remark.windy.me"
+  remark42Theme = "dark"
+  comments = true
+  remark42ShowComments = 10
+
+[[params.social]]
+name = "GitHub"
+icon = "github"
+url = "https://github.com/windyboy"
+
+[[params.social]]
+name = "Twitter"
+icon = "twitter"
+url = "https://twitter.com/windysylph/"
+
+[[menu.main]]
+name = "Posts"
+url = "/post/"
+weight = 2
+
+[[menu.main]]
+name = "Categories"
+url = "/categories/"
+weight = 3
+
+[[menu.main]]
+name = "Tags"
+url = "/tags"
+weight = 4
