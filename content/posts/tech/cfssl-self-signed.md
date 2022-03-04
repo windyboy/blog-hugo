@@ -1,7 +1,7 @@
 ---
 title: "使用CFSSL证书的生成"
 date: 2022-03-02T15:40:47+08:00
-draft: true
+# draft: true
 images:
 Categories: ["技术"]
 Tags: ["cfssl","x509","selfsigned","ssl","certificates"]
