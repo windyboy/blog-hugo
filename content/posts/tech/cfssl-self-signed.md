@@ -131,8 +131,8 @@ root
 ### 2. 生成证书签发
 
 ```
-$ mkdir intermedia
-$ vim intermedia/intermedia-csr.json
+$ mkdir intermediate
+$ vim intermediate/intermediate-csr.json
 {
   "CN": "example.net CA",
   "key": {
@@ -170,8 +170,8 @@ intermediate
 
 ```
 $ mkdir server
-$ cp ca-csr.json server/server.json
-$ vim server/server.json
+$ cp ca-csr.json server/server-csr.json
+$ vim server/server-csr.json
 {
     "CN": "example.net",
     "hosts": [
@@ -193,7 +193,7 @@ $ vim server/server.json
 }
 
 ```
-根据实际情况修改server.json, 这个就是服务器证书，对应到需要的域名
+根据实际情况修改server-csr.json, 这个就是服务器证书，对应到需要的域名
 
 ```
 $ cfssl gencert \
