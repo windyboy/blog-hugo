@@ -201,7 +201,7 @@ $ cfssl gencert \
   -ca-key intermediate/intermediate-ca-key.pem \
   -config ca-config.json \
   -profile host \
-  server/server.json \
+  server/server-csr.json \
 | cfssljson -bare server/server
 
 $ tree server
