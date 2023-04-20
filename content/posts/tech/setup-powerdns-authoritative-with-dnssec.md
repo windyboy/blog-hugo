@@ -275,6 +275,7 @@ x.x.x.x2   ns2.some.host
 ### Master ns1.some.host
 
 修改master 服务器设置，一个是master=yes,另一个是allow-axfr-ips=<slave ip>
+
 vim /etc/powerdns/pdns.conf
 ```
 master=yes
@@ -287,6 +288,7 @@ allow-axfr-ips=x.x.x.x2
 ### Slave ns2.some.host
 
 修改slave的配置，一个是slave=yes, 另一个 allow-axfr-ips=<master ip>
+
 vim /etc/powerdns/pdns.conf
 ```
 slave=yes
