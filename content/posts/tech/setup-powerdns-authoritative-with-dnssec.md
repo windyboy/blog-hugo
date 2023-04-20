@@ -91,8 +91,8 @@ pdns=> \i /usr/share/doc/pdns-backend-pgsql/schema.pgsql.sql
 ```
 # psql -U pdns -d pdns -h 127.0.0.1 -p 5432
 
-pdns=> insert into supermasters (ip, nameserver, account) values ('x.x.x.x1', 'ns2.some.host','admin');
-pdns=> insert into domains (name, master, type) values ('some.host', 'x.x.x.x1', 'SLAVE');
+pdns=> insert into supermasters (ip, nameserver, account) values ('x.x.x.x1', 'ns1.some.host','');
+pdns=> 
 pdns=>\q
 
 # systemctl restart pdns
@@ -273,33 +273,12 @@ x.x.x.x2   ns2.some.host
 ```
 
 ### Master ns1.some.host
-```
-# vim /etc/powerdns/pdns.conf
 
-config-dir=/etc/powerdns
-setuid=pdns
-setgid=pdns
+修改master 服务器设置，一个是master=yes,另一个是allow-axfr-ips=<slave ip>
+vim /etc/powerdns/pdns.conf
+```
 master=yes
-slave=no
-allow-axfr-ips=x.x.x.x2/32
-default-soa-name=ns1.some.host
-dnsupdate=yes
-daemon=yes
-disable-axfr=no
-guardian=yes
-local-address=0.0.0.0
-local-port=53
-log-dns-details=no
-log-dns-queries=no
-loglevel=9
-socket-dir=/var/run
-version-string=powerdns
-# only 4.0
-webserver=yes
-api=yes
-api-key=somekey
-include-dir=/etc/powerdns/pdns.d
-launch=
+allow-axfr-ips=x.x.x.x2
 ```
 
 其中x.x.x.x2为从服务器ns2.some.host的ip地址
@@ -307,28 +286,13 @@ launch=
 
 ### Slave ns2.some.host
 
+修改slave的配置，一个是slave=yes, 另一个 allow-axfr-ips=<master ip>
+vim /etc/powerdns/pdns.conf
 ```
-# vim /etc/powerdns/pdns.conf
-
-config-dir=/etc/powerdns
-setuid=pdns
-setgid=pdns
-master=no
 slave=yes
-daemon=yes
-disable-axfr=yes
-guardian=yes
-local-address=0.0.0.0
-local-port=53
-log-dns-details=no
-log-dns-queries=no
-loglevel=9
-slave-cycle-interval=60
-socket-dir=/var/run
-version-string=powerdns
-include-dir=/etc/powerdns/pdns.d
-launch=
+allow-axfr-ips=x.x.x.x1
 ```
+
 
 
 ### 使用[powerdns-admin]界面创建域名
@@ -389,7 +353,7 @@ DS = some.host. IN DS 59581 13 4 53062fef193fae2564f9f2441cb821ae3b55c92afac5790
 ```
 # pdnsutil generate-tsig-key mykey hmac-sha512
 
-# pdnsutil activate-tsig-key some.host mykey
+# pdnsutil activate-tsig-key some.host mykey primary
 
 ```
 
