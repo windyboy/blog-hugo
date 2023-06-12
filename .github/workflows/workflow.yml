@@ -26,6 +26,14 @@ jobs:
       - name: Clean public directory
         run: rm -rf public
 
+      - name: cache
+        uses: actions/cache@v2
+        with:
+          path: /tmp/hugo_cache
+          key: ${{ runner.os }}-hugomod-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-hugomod-
+
       - name: Build
         run: hugo --gc --minify --cleanDestinationDir --environment production
 
