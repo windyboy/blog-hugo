@@ -38,7 +38,7 @@ jobs:
         run: hugo --gc --minify --cleanDestinationDir --environment production
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v3.9.3
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           personal_token: ${{ secrets.ACTION_ACCESS_TOKEN }}
